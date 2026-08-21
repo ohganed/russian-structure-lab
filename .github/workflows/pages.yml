@@ -22,6 +22,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Apply iOS Russian TTS hotfix
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          old = "function speak(text,rate=.86){if(!('speechSynthesis'in window))return;speechSynthesis.cancel();speechSynthesis.resume();const u=new SpeechSynthesisUtterance(text);u.lang='ru-RU';u.rate=rate;u.pitch=1;const voice=russianVoice();if(voice)u.voice=voice;speechSynthesis.speak(u)}"
+          new = "function speak(text,rate=.86){if(!('speechSynthesis'in window))return;speechSynthesis.cancel();speechSynthesis.resume();const spokenText=(text.trim()==='Я'?'я':text);const u=new SpeechSynthesisUtterance(spokenText);u.lang='ru-RU';u.rate=rate;u.pitch=1;const voice=russianVoice();if(voice)u.voice=voice;speechSynthesis.speak(u)}"
+          if old not in s:
+              raise SystemExit('TTS function signature not found; aborting deploy rather than silently skipping the fix.')
+          p.write_text(s.replace(old, new), encoding='utf-8')
+          PY
       - uses: actions/configure-pages@v5
         with:
           enablement: true
