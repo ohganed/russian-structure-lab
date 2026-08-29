@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Russian Structure Lab — Curriculum Coverage Map</title>
+<style>
+:root{color-scheme:light;--bg:#f5f4ef;--panel:#fff;--ink:#25251f;--muted:#777368;--line:#ddd9cc;--soft:#efede5;--ok:#e2f3df;--warn:#fff0c9;--gap:#f4dfdc;--accent:#6c5a3a}
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink)}
+main{max-width:1100px;margin:auto;padding:24px}.hero{display:flex;gap:18px;justify-content:space-between;align-items:flex-start;flex-wrap:wrap}.eyebrow{font-size:12px;letter-spacing:.08em;color:var(--muted);font-weight:700}.hero h1{margin:.25rem 0 .4rem;font-size:clamp(28px,5vw,48px)}.hero p{max-width:700px;color:var(--muted);line-height:1.6}.pill{background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:10px 14px;font-size:13px}
+.summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:22px 0}.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px}.n{font-size:32px;font-weight:800}.label{font-size:12px;color:var(--muted);margin-top:4px}.sub{font-size:12px;color:var(--muted);margin-top:6px}
+.section{background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:18px;margin:16px 0}.section h2{margin:0 0 6px;font-size:20px}.section p{margin:0 0 16px;color:var(--muted);font-size:14px;line-height:1.6}.grid{display:grid;grid-template-columns:1.7fr repeat(4,1fr);gap:7px;align-items:stretch}.cell{border:1px solid var(--line);border-radius:12px;padding:11px 9px;min-height:64px;background:var(--soft);font-size:13px}.head{min-height:auto;font-weight:800;text-align:center;background:#f9f8f4}.category{font-weight:700;background:#faf9f5;display:flex;align-items:center}.value{text-align:center}.value strong{display:block;font-size:22px}.value small{display:block;color:var(--muted);margin-top:3px}.ok{background:var(--ok)}.warn{background:var(--warn)}.gap{background:var(--gap)}
+.bar{height:8px;border-radius:999px;background:#e6e2d8;margin-top:9px;overflow:hidden}.bar>i{display:block;height:100%;background:currentColor;opacity:.4}.notes{font-size:13px;line-height:1.7;color:var(--muted)}.legend{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.legend span{font-size:12px;border:1px solid var(--line);padding:6px 9px;border-radius:999px}.footer{font-size:12px;color:var(--muted);padding:8px 2px 30px}
+@media(max-width:720px){main{padding:15px}.summary{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1.5fr repeat(2,1fr)}.hideMobile{display:none}.cell{padding:9px 6px}.value strong{font-size:19px}}
+</style>
+</head>
+<body>
+<main>
+<section class="hero">
+<div><div class="eyebrow">RUSSIAN STRUCTURE LAB · CURRICULUM ENGINE</div><h1>📊 A1 Coverage Map</h1><p>500文を闇雲に増やさず、既存教材とCalibration Corpusを重ねて、10カテゴリの不足を可視化します。Calibration 50文は品質基準、legacyは再利用候補として別々に数えます。</p></div>
+<div class="pill">🌱 A1 target: 500 = 10 × 50</div>
+</section>
+<div class="summary">
+<div class="card"><div class="n" id="calTotal">—</div><div class="label">🧪 Calibration sentences</div><div class="sub">品質ゲート用</div></div>
+<div class="card"><div class="n" id="legacyA1">—</div><div class="label">🧳 Legacy A1 candidates</div><div class="sub">provisional分類</div></div>
+<div class="card"><div class="n" id="uniqueA1">—</div><div class="label">🧠 Unique A1 sentences</div><div class="sub">ロシア語本文で重複除外</div></div>
+<div class="card"><div class="n" id="remaining">—</div><div class="label">🕳️ Remaining to 500</div><div class="sub">現在のユニーク文との差</div></div>
+</div>
+<section class="section">
+<h2>🪆 Category coverage</h2><p>各カテゴリ50文が最終目標。🧪は新Calibration、🧳は既存教材からA1候補、Σは重複を除いた現在量です。</p>
+<div class="grid" id="coverageGrid"></div>
+<div class="legend"><span>🟢 25文以上</span><span>🟡 10–24文</span><span>🔴 0–9文</span><span>📍 target = 50/category</span></div>
+</section>
+<section class="section"><h2>🔎 What this tells us</h2><div class="notes" id="notes">Calculating…</div></section>
+<div class="footer">Classification is provisional until the Educational / CEFR Quality Gate passes. This dashboard does not alter materials.js.</div>
+</main>
+<script src="../materials.js"></script>
+<script src="a1-calibration-50.js"></script>
+<script src="legacy-migration-map.js"></script>
+<script>
+const cats={DL:['🏠','Daily Life'],PR:['👥','People & Relationships'],WS:['💼','Work & Study'],TM:['🚆','Travel & Movement'],FS:['🍽️','Food & Shopping'],BE:['❤️','Body & Emotion'],NE:['🌦️','Nature & Environment'],SI:['📰','Society & Information'],TO:['🧠','Thought & Opinion'],CE:['🎭','Culture & Expression']};
+const legacyMaterials=(window.RSL_MATERIALS||[]).map(a=>({id:a[0],ru:a[2]}));
+const legacyById=Object.fromEntries(legacyMaterials.map(x=>[x.id,x]));
+const migration=window.RSL_LEGACY_MIGRATION_MAP||{};
+const cal=window.RSL_A1_CALIBRATION||[];
+const legacyA1=Object.entries(migration).filter(([,m])=>m.level==='A1').map(([id,m])=>({...legacyById[id],id,category:m.category,status:m.status})).filter(x=>x.ru);
+const norm=s=>(s||'').trim().toLowerCase().replace(/ё/g,'е').replace(/[.!?…]+$/,'').trim();
+const allA1=[...cal.map(x=>({ru:x.ru,category:x.category,source:'cal'})),...legacyA1.map(x=>({ru:x.ru,category:x.category,source:'legacy'}))];
+const uniqueMap=new Map(); allA1.forEach(x=>{const k=norm(x.ru); if(!uniqueMap.has(k)) uniqueMap.set(k,x)});
+const unique=[...uniqueMap.values()];
+document.getElementById('calTotal').textContent=cal.length;
+document.getElementById('legacyA1').textContent=legacyA1.length;
+document.getElementById('uniqueA1').textContent=unique.length;
+document.getElementById('remaining').textContent=Math.max(0,500-unique.length);
+const grid=document.getElementById('coverageGrid');
+grid.innerHTML='<div class="cell head">Category</div><div class="cell head">🧪</div><div class="cell head">🧳</div><div class="cell head hideMobile">Σ unique</div><div class="cell head hideMobile">Gap → 50</div>';
+const rows=[];
+for(const [code,[emoji,name]] of Object.entries(cats)){
+ const c=cal.filter(x=>x.category===code).length;
+ const l=legacyA1.filter(x=>x.category===code).length;
+ const u=new Set([...cal.filter(x=>x.category===code).map(x=>norm(x.ru)),...legacyA1.filter(x=>x.category===code).map(x=>norm(x.ru))]).size;
+ const gap=Math.max(0,50-u); rows.push({code,name,emoji,c,l,u,gap});
+ const cls=u>=25?'ok':u>=10?'warn':'gap';
+ grid.insertAdjacentHTML('beforeend',`<div class="cell category">${emoji} ${name}</div><div class="cell value"><strong>${c}</strong><small>cal</small></div><div class="cell value"><strong>${l}</strong><small>legacy</small></div><div class="cell value ${cls} hideMobile"><strong>${u}</strong><small>unique</small><div class="bar"><i style="width:${Math.min(100,u/50*100)}%"></i></div></div><div class="cell value ${cls} hideMobile"><strong>${gap}</strong><small>needed</small></div>`);
+}
+const poorest=[...rows].sort((a,b)=>a.u-b.u).slice(0,4);
+const strongest=[...rows].sort((a,b)=>b.u-a.u).slice(0,3);
+const duplicateCount=cal.length+legacyA1.length-unique.length;
+document.getElementById('notes').innerHTML=`<p>🔴 <b>最優先で埋める領域：</b> ${poorest.map(x=>`${x.emoji} ${x.name} (${x.u}/50)`).join('、')}</p><p>🟢 <b>現在比較的強い領域：</b> ${strongest.map(x=>`${x.emoji} ${x.name} (${x.u}/50)`).join('、')}</p><p>♻️ Calibrationとlegacyを合わせたとき、ロシア語本文ベースの重複は <b>${duplicateCount}</b> 文あります。重複は捨てるのではなく、より良いmetadataを持つ方へ統合する候補です。</p><p>📐 次の生成ルールは「不足カテゴリを優先しつつ、Case / Aspect / movement / experiencer / agreement などの構造カバレッジも均等化する」です。</p>`;
+</script>
+</body>
+</html>
