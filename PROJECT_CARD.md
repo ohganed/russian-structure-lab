@@ -17,7 +17,7 @@ The curriculum target is **3,000 core sentences**: 500 sentences at each CEFR le
 Work proceeds in this order unless this file is explicitly changed:
 
 1. ✅ Introduce `PROJECT_CARD.md` and GitHub Source-of-Truth rules.
-2. 🔄 Unify the legacy and new material engines.
+2. 🟡 Unify the legacy and new material engines — compatibility engine implemented; runtime self-test created; final verification/promotion into Learn pending.
 3. ⏳ Integrate A1–C2 selection into the main Learn UI.
 4. ⏳ Run Educational Validity Gate on the A1 50-sentence calibration set.
 5. ⏳ Add automated validation.
@@ -34,11 +34,15 @@ Repository evidence exists for these items.
 - Curriculum status is tracked in `CURRICULUM_STATUS.md`.
 - A1–C2 curriculum browser exists in `level-browser.html`.
 - My Material exploratory reader exists in `my-material.html`.
-- My Material supports Russian text input, local-first analysis, TTS controls, Current Focus, case display, aspect display, morphology display, and one-level network exploration for supported entries.
+- `material-engine.js` defines a canonical normalized material shape and adapters for legacy and modern material records.
+- `level-browser.html` now reads curriculum counts through `RSL_MATERIAL_ENGINE` rather than directly reading only the A1 array.
+- `MATERIAL_ENGINE_MIGRATION.md` documents the non-destructive migration path.
+- `material-engine-selftest.html` exists as a runtime verification surface.
 
 ## 🟡 IMPLEMENTED / NOT FULLY VERIFIED
 Code exists, but the project must not describe these as fully validated yet.
 
+- Canonical Material Engine runtime behavior across the deployed GitHub Pages surface.
 - 🎧 Audio behavior across all supported browsers/devices.
 - 📐 Case labels and full paradigms across all material entries.
 - 🔄 Imperfective/perfective pairing across all verbs.
@@ -61,9 +65,10 @@ These are active design decisions even when implementation is incomplete.
 - 📍 Current Focus should remain visible while the learner explores deeper relationships.
 - Emoji are Concept Anchors, not decoration.
 - Curriculum is spiral: the same worlds recur from A1 to C2 with progressively deeper language.
+- Legacy material receives `UNCLASSIFIED`, not an automatically guessed CEFR level.
 
 ## ⚪ PLANNED
-- One canonical Material Engine serving Learn, Curriculum Browser, and eventually My Material where appropriate.
+- Main Learn consumer migrated to the canonical Material Engine.
 - A1–C2 level selector inside the main Learn UI.
 - Category filtering within each CEFR level.
 - Educational Validity Gate results stored as repository data.
@@ -73,8 +78,8 @@ These are active design decisions even when implementation is incomplete.
 - Robust 🇯🇵 / 🇬🇧 explanation toggle or pathway system.
 
 ## 🔴 KNOWN ISSUES
-1. `index.html` still reads the legacy `materials.js` directly and is not yet driven by the new CEFR curriculum engine.
-2. `level-browser.html` reads the A1 calibration dataset independently, so the app currently has more than one material path.
+1. `index.html` still reads the legacy `materials.js` path and is not yet driven by the canonical Material Engine.
+2. Step 2 has repository implementation evidence but its deployed runtime self-test has not yet been independently verified in this record.
 3. The A1 calibration corpus has not passed Educational Validity Gate.
 4. A2–C2 curriculum slots exist but their calibration corpora are not yet populated.
 5. My Material is still largely Japanese-pathway oriented.
@@ -109,15 +114,17 @@ Use these terms consistently:
 Never use “complete”, “working”, “correct”, or equivalent for a major feature without repository evidence.
 
 ## ➡️ NEXT EVIDENCE STEP
-**Step 2: unify the legacy and new material engines without deleting the legacy corpus.**
+**Finish Step 2 verification, then Step 3: integrate A1–C2 selection into the main Learn UI through the canonical Material Engine.**
 
-Required evidence for Step 2 PASS:
+Step 2 PASS requires:
 
-- one canonical normalized material shape;
-- a compatibility adapter for legacy `materials.js`;
-- A1 calibration data accepted through the same engine;
-- no destructive deletion of existing material;
-- documented migration path;
-- Learn can later consume this engine without duplicating curriculum logic.
+- canonical normalized material shape — ✅ implemented;
+- legacy compatibility adapter — ✅ implemented;
+- A1 calibration accepted through same engine — ✅ implemented in engine path;
+- no destructive deletion — ✅ confirmed;
+- documented migration path — ✅ implemented;
+- runtime self-test — 🟡 page created, verification record pending.
+
+Step 3 will not silently reclassify legacy material. Empty levels must remain visible as `0 / 500` rather than disappearing.
 
 See `EVIDENCE_GATE.md` for release/gate rules.
