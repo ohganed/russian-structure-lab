@@ -19,7 +19,7 @@ Work proceeds in this order unless this file is explicitly changed:
 1. ✅ Introduce `PROJECT_CARD.md` and GitHub Source-of-Truth rules.
 2. ✅ Unify the legacy and new material engines.
 3. 🟡 Integrate A1–C2 selection into the main Learn UI — implemented; browser/device verification pending.
-4. ⏳ Run Educational Validity Gate on the A1 50-sentence calibration set.
+4. 🟡 Run Educational Validity Gate on the A1 50-sentence calibration set — audit completed; corrections/re-audit pending.
 5. ⏳ Add automated validation.
 6. ⏳ Expand A1 from 50 to 500 validated sentences.
 7. ⏳ Expand A2 → B1 → B2 → C1 → C2.
@@ -38,9 +38,10 @@ Repository evidence exists for these items.
 - Curriculum status is tracked in `CURRICULUM_STATUS.md`.
 - A1–C2 curriculum browser exists in `level-browser.html`.
 - My Material exploratory reader exists in `my-material.html`.
+- `A1_EVG_AUDIT.md` records sentence-level Educational Validity Gate findings for all 50 A1 calibration sentences.
 
 ## 🟡 IMPLEMENTED / NOT FULLY VERIFIED
-Code exists, but the project must not describe these as fully validated yet.
+Code or review evidence exists, but the project must not describe these as fully validated yet.
 
 - A1–C2 selector inside canonical `index.html`.
 - Category filtering inside canonical Learn.
@@ -51,7 +52,7 @@ Code exists, but the project must not describe these as fully validated yet.
 - 🔄 Imperfective/perfective pairing across all verbs.
 - 🧬 Morphological decomposition accuracy beyond explicitly curated entries.
 - 📱 Mobile navigation and layout across current iPhone/Safari versions.
-- A1 calibration-set linguistic and pedagogical quality.
+- A1 EVG has identified 5 required revisions and several pedagogical-note requirements; corrected dataset has not yet passed re-audit.
 
 ## 🔵 DECIDED
 - GitHub `main` is the project Source of Truth.
@@ -68,7 +69,7 @@ Code exists, but the project must not describe these as fully validated yet.
 - Legacy material is preserved during migration and never silently promoted into a CEFR level.
 
 ## ⚪ PLANNED
-- Educational Validity Gate results stored as repository data.
+- Apply all A1 EVG corrections and pedagogical metadata.
 - Automated curriculum schema validation, duplicate checks, ID checks, coverage checks, and selected pedagogical checks.
 - 500 validated sentences per CEFR level.
 - Personal Encounter Graph / Map connected to general language nodes.
@@ -76,7 +77,7 @@ Code exists, but the project must not describe these as fully validated yet.
 - Feature parity review between `legacy-index.html` and canonical Learn before retiring legacy UI.
 
 ## 🔴 KNOWN ISSUES
-1. A1 calibration corpus has not passed Educational Validity Gate.
+1. A1 calibration corpus has not yet passed final Educational Validity Gate because corrections/re-audit remain.
 2. A2–C2 curriculum slots exist but their calibration corpora are not yet populated.
 3. My Material is still largely Japanese-pathway oriented.
 4. Some morphology is heuristic/local estimation and must not be treated as linguistically verified.
@@ -94,7 +95,7 @@ Code exists, but the project must not describe these as fully validated yet.
 ## 📊 Current curriculum evidence
 | Level | Calibration data | Final target | Evidence state |
 |---|---:|---:|---|
-| A1 | 50 | 500 | 🟡 calibration exists; EVG pending |
+| A1 | 50 | 500 | 🟡 EVG audit completed; corrections/re-audit pending |
 | A2 | 0 | 500 | ⚪ not started |
 | B1 | 0 | 500 | ⚪ not started |
 | B2 | 0 | 500 | ⚪ not started |
@@ -110,7 +111,7 @@ Code exists, but the project must not describe these as fully validated yet.
 Never use “complete”, “working”, “correct”, or equivalent for a major feature without repository evidence.
 
 ## ➡️ NEXT EVIDENCE STEP
-**Finish Step 3 verification, then begin Step 4: Educational Validity Gate on A1 50.**
+**Complete Step 3 browser verification, while applying the Step 4 A1 corrections already identified.**
 
 Step 3 PASS requires evidence that canonical `index.html` in a real browser:
 - opens A1 and displays the calibration corpus;
@@ -121,4 +122,4 @@ Step 3 PASS requires evidence that canonical `index.html` in a real browser:
 - plays word and sentence audio where browser TTS is available;
 - keeps legacy corpus accessible as Legacy without CEFR misclassification.
 
-Step 4 then audits all 50 A1 sentences for naturalness, CEFR fit, pedagogical framing, case labels, aspect, morphology, duplication, and 🇯🇵/🇬🇧 pathway quality.
+Step 4 PASS then requires the revisions in `A1_EVG_AUDIT.md` to be applied and the corrected 50-sentence set to pass re-audit.
