@@ -22,24 +22,39 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Apply iOS Russian TTS hotfix
+
+      # The canonical Learn UI already contains the iOS "Я" TTS normalization.
+      # Keep a compatibility hotfix for the preserved legacy UI, but never fail
+      # deployment merely because an old function signature changed.
+      - name: Keep legacy iOS Russian TTS compatibility
         run: |
           python - <<'PY'
           from pathlib import Path
-          p = Path('index.html')
+
+          p = Path('legacy-index.html')
+          if not p.exists():
+              print('legacy-index.html not present; nothing to patch')
+              raise SystemExit(0)
+
           s = p.read_text(encoding='utf-8')
           old = "function speak(text,rate=.86){if(!('speechSynthesis'in window))return;speechSynthesis.cancel();speechSynthesis.resume();const u=new SpeechSynthesisUtterance(text);u.lang='ru-RU';u.rate=rate;u.pitch=1;const voice=russianVoice();if(voice)u.voice=voice;speechSynthesis.speak(u)}"
           new = "function speak(text,rate=.86){if(!('speechSynthesis'in window))return;speechSynthesis.cancel();speechSynthesis.resume();const spokenText=(text.trim()==='Я'?'я':text);const u=new SpeechSynthesisUtterance(spokenText);u.lang='ru-RU';u.rate=rate;u.pitch=1;const voice=russianVoice();if(voice)u.voice=voice;speechSynthesis.speak(u)}"
-          if old not in s:
-              raise SystemExit('TTS function signature not found; aborting deploy rather than silently skipping the fix.')
-          p.write_text(s.replace(old, new), encoding='utf-8')
+
+          if old in s:
+              p.write_text(s.replace(old, new), encoding='utf-8')
+              print('Applied legacy iOS TTS compatibility patch')
+          else:
+              print('Legacy TTS is already patched or implementation changed; continuing deployment')
           PY
+
       - uses: actions/configure-pages@v5
         with:
           enablement: true
+
       - uses: actions/upload-pages-artifact@v3
         with:
           path: .
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
