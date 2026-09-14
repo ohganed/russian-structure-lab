@@ -1,0 +1,34 @@
+{
+  "schemaVersion": "1.0",
+  "title": "遅刻しそうで心配する",
+  "language": "ru",
+  "originalText": "Я боялся, что опоздаю.",
+  "sentences": [
+    {
+      "id": "s1",
+      "text": "Я боялся, что опоздаю.",
+      "stressedText": "Я боя́лся, что опозда́ю.",
+      "ttsText": "Я боялся, что опоздаю.",
+      "overallMeaning": {"ja": "私は遅れるのではないかと心配していた。", "en": "I was afraid that I would be late."},
+      "sentenceType": {"ru": "сложноподчинённое предложение", "en": "complex sentence with a subordinate clause", "ja": "従属節をもつ複文"},
+      "words": [
+        {"id":"w1","surface":"Я","stressed":"Я","start":0,"end":1,"meaning":{"ja":"私が／私は","en":"I"},"lemma":"я","partOfSpeech":{"ru":"местоимение","en":"pronoun","ja":"代名詞"},"morphology":{"case":"nominative","number":"singular","person":1},"grammar":{"role":"subject"},"confidence":{"overall":"high"}},
+        {"id":"w2","surface":"боялся","stressed":"боя́лся","start":2,"end":8,"meaning":{"ja":"恐れていた・心配していた","en":"was afraid"},"lemma":"бояться","partOfSpeech":{"ru":"глагол","en":"verb","ja":"動詞"},"morphemes":[{"id":"w2m1","text":"боя","type":"stem","meaning":{"ja":"恐れる意味の中心","en":"fear stem"},"confidence":"medium"},{"id":"w2m2","text":"л","type":"past_suffix","meaning":{"ja":"過去形標識","en":"past-tense marker"},"confidence":"high"},{"id":"w2m3","text":"ся","type":"reflexive_suffix","meaning":{"ja":"再帰接尾辞","en":"reflexive suffix"},"confidence":"high"}],"morphology":{"tense":"past","gender":"masculine","number":"singular","reflexive":true},"aspect":"imperfective","aspectPair":{"imperfective":"бояться","perfective":null,"note":"A simple one-to-one perfective pair is not supplied here because the lexical pairing is context-dependent."},"grammar":{"role":"predicate"},"wordFamily":[{"word":"боязнь","meaning":{"ja":"恐れ","en":"fear"}}],"confidence":{"overall":"high","aspectPair":"uncertain"}},
+        {"id":"w3","surface":"что","stressed":"что","start":10,"end":13,"meaning":{"ja":"〜ということ／〜と","en":"that"},"lemma":"что","partOfSpeech":{"ru":"союз","en":"conjunction","ja":"接続詞"},"grammar":{"role":"subordinator"},"confidence":{"overall":"high"}},
+        {"id":"w4","surface":"опоздаю","stressed":"опозда́ю","start":14,"end":21,"meaning":{"ja":"私は遅れるだろう","en":"I will be late"},"lemma":"опоздать","partOfSpeech":{"ru":"глагол","en":"verb","ja":"動詞"},"morphemes":[{"id":"w4m1","text":"о","type":"prefix","meaning":{"ja":"接頭辞要素","en":"prefix element"},"confidence":"medium"},{"id":"w4m2","text":"позд","type":"root_stem","meaning":{"ja":"遅い・遅れる意味領域","en":"late-related stem"},"confidence":"medium"},{"id":"w4m3","text":"аю","type":"ending_complex","meaning":{"ja":"1人称単数の活用を含む語尾部分","en":"ending complex including 1st-person singular"},"confidence":"medium"}],"morphology":{"tense":"future","person":1,"number":"singular"},"aspect":"perfective","aspectPair":{"perfective":"опоздать","imperfective":"опаздывать"},"conjugation":{"person":"1st","number":"singular","form":"опоздаю"},"grammar":{"role":"predicate of subordinate clause","implicitSubject":"я"},"confidence":{"overall":"high","morphemes":"medium"}}
+      ],
+      "chunks": [
+        {"id":"ch1","text":"Я боялся","stressed":"Я боя́лся","start":0,"end":8,"wordIds":["w1","w2"],"type":"main_clause_core","meaningOrder":{"ja":"私は―心配していた","en":"I — was afraid"},"naturalMeaning":{"ja":"私は心配していた","en":"I was afraid"},"function":{"ru":"главная часть","en":"main clause","ja":"主節"},"headWordId":"w2","structureNodeId":"n1"},
+        {"id":"ch2","text":"что опоздаю","stressed":"что опозда́ю","start":10,"end":21,"wordIds":["w3","w4"],"type":"subordinate_clause","meaningOrder":{"ja":"〜と―私は遅れるだろう","en":"that — I will be late"},"naturalMeaning":{"ja":"遅れるのではないかと","en":"that I would be late"},"function":{"ru":"изъяснительное придаточное","en":"content subordinate clause","ja":"内容を表す従属節"},"headWordId":"w4","structureNodeId":"n3"}
+      ],
+      "structure": {
+        "tree": {
+          "id":"n0","type":"complex_sentence","labelRu":"сложноподчинённое предложение","labelEn":"Complex sentence","labelJa":"複文","refIds":["w1","w2","w3","w4"],"children":[
+            {"id":"n1","type":"main_clause","labelRu":"главная часть","labelEn":"Main clause","labelJa":"主節","text":"Я боялся","refIds":["w1","w2"],"children":[{"id":"n2","type":"predicate","labelRu":"сказуемое","labelEn":"Predicate","labelJa":"述語","text":"боялся","refIds":["w2"],"children":[]}]},
+            {"id":"n3","type":"subordinate_clause","labelRu":"придаточная часть","labelEn":"Subordinate clause","labelJa":"従属節","text":"что опоздаю","refIds":["w3","w4"],"children":[{"id":"n4","type":"predicate","labelRu":"сказуемое","labelEn":"Predicate","labelJa":"従属節の述語","text":"опоздаю","refIds":["w4"],"children":[]}]}
+          ]
+        }
+      }
+    }
+  ]
+}
