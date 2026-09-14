@@ -39,6 +39,12 @@ Repository evidence exists for these items.
 - A1–C2 curriculum browser exists in `level-browser.html`.
 - My Material exploratory reader exists in `my-material.html`.
 - `A1_EVG_AUDIT.md` records sentence-level Educational Validity Gate findings for all 50 A1 calibration sentences.
+- `aspect-lab.html` exists as an interactive contrast between imperfective event-internal view and perfective bounded-event view.
+- `word-family-lab.html` exists for curated word-family exploration around `пис- / пиш-`.
+- `prefix-lab.html` exists for cross-verb comparison of prefix semantic tendencies.
+- `suffix-lab.html` exists for curated comparison of secondary imperfective formation, `-ва-`, `-ну-`, and stem alternation.
+- `morphology-hub.html` exists as the structure-lab entry point.
+- `verb-explorer.html` exists as a unified curated verb-structure view connecting aspect, anatomy, affix/stem contribution, word family, examples, audio, and deep links to specialist labs.
 
 ## 🟡 IMPLEMENTED / NOT FULLY VERIFIED
 Code or review evidence exists, but the project must not describe these as fully validated yet.
@@ -51,6 +57,9 @@ Code or review evidence exists, but the project must not describe these as fully
 - 📐 Case labels and full paradigms across all material entries.
 - 🔄 Imperfective/perfective pairing across all verbs.
 - 🧬 Morphological decomposition accuracy beyond explicitly curated entries.
+- The unified Verb Structure Explorer currently uses a deliberately limited curated set plus selected inflected-form aliases; exhaustive Russian-verb coverage is not implemented.
+- Prefix / suffix / word-family explanations in the structure labs require independent linguistic review before being described as a validated morphology reference.
+- Cross-browser/mobile behavior of Aspect Lab, Word Family Lab, Prefix Lab, Suffix Lab, Morphology Hub, and Verb Structure Explorer.
 - 📱 Mobile navigation and layout across current iPhone/Safari versions.
 - A1 EVG has identified 5 required revisions and several pedagogical-note requirements; corrected dataset has not yet passed re-audit.
 
@@ -62,6 +71,9 @@ Code or review evidence exists, but the project must not describe these as fully
 - Verb learning should expose imperfective/perfective pairs where relevant.
 - Russian word decomposition must preserve the original spelling.
 - Unknown/heuristic morphology must be marked as uncertain rather than presented as verified fact.
+- The Verb Structure Explorer must **not** invent decomposition for an unknown verb. If a word is outside the curated set, the UI should say so and route the learner to verified neighboring structures.
+- Prefix and suffix meanings are semantic tendencies, not equations. Whole-word lexical meaning, aspect, stem alternation, lexicalization, and context remain separate explanatory layers.
+- `говорить ↔ сказать` and similar relationships must not be forced into fake one-affix morphological pairs.
 - 🇯🇵 Japanese and 🇬🇧 English explanation paths are separate pedagogical paths, not literal translations of each other.
 - 📍 Current Focus should remain visible while the learner explores deeper relationships.
 - Emoji are Concept Anchors, not decoration.
@@ -71,6 +83,9 @@ Code or review evidence exists, but the project must not describe these as fully
 ## ⚪ PLANNED
 - Apply all A1 EVG corrections and pedagogical metadata.
 - Automated curriculum schema validation, duplicate checks, ID checks, coverage checks, and selected pedagogical checks.
+- Centralize curated morphology/aspect entries into one shared data source so `aspect-lab.html`, `word-family-lab.html`, `prefix-lab.html`, `suffix-lab.html`, and `verb-explorer.html` cannot silently drift apart.
+- Add automated consistency checks for aspect pairs, morphology labels, deep-link targets, and curated entry IDs.
+- Add a direct, low-clutter Verb Explorer / Morphology Hub entry from canonical Learn without overwhelming the main learning surface.
 - 500 validated sentences per CEFR level.
 - Personal Encounter Graph / Map connected to general language nodes.
 - Robust 🇯🇵 / 🇬🇧 explanation toggle or pathway system.
@@ -84,6 +99,8 @@ Code or review evidence exists, but the project must not describe these as fully
 5. Automated repository validation is not yet installed.
 6. Canonical Learn integration requires real browser/device verification before Step 3 can be marked PASS.
 7. Legacy Learn has features not yet migrated to canonical Learn; `legacy-index.html` remains available during migration.
+8. Structure-lab data is currently duplicated across several standalone HTML pages, so semantic explanations can drift until a shared morphology data module is introduced.
+9. Verb Structure Explorer intentionally has partial curated coverage; unknown verbs currently return an explicit unavailable state rather than a guessed analysis.
 
 ## ⚫ DEPRECATED / DO NOT ASSUME
 - Do not treat the old `materials.js` structure as the final curriculum schema.
@@ -91,6 +108,7 @@ Code or review evidence exists, but the project must not describe these as fully
 - Do not claim A1 is complete while only the 50-sentence calibration set exists.
 - Do not claim Encounter Map is a complete persistent personal-language graph.
 - Do not infer implementation from chat discussion alone.
+- Do not describe the current structure labs as a complete Russian morphological analyzer.
 
 ## 📊 Current curriculum evidence
 | Level | Calibration data | Final target | Evidence state |
@@ -111,7 +129,7 @@ Code or review evidence exists, but the project must not describe these as fully
 Never use “complete”, “working”, “correct”, or equivalent for a major feature without repository evidence.
 
 ## ➡️ NEXT EVIDENCE STEP
-**Complete Step 3 browser verification, while applying the Step 4 A1 corrections already identified.**
+**Complete Step 3 browser verification, while applying the Step 4 A1 corrections already identified. In parallel, run a browser smoke test and linguistic consistency audit for the new structure-lab pages before promoting them beyond IMPLEMENTED / NOT VERIFIED.**
 
 Step 3 PASS requires evidence that canonical `index.html` in a real browser:
 - opens A1 and displays the calibration corpus;
@@ -123,3 +141,11 @@ Step 3 PASS requires evidence that canonical `index.html` in a real browser:
 - keeps legacy corpus accessible as Legacy without CEFR misclassification.
 
 Step 4 PASS then requires the revisions in `A1_EVG_AUDIT.md` to be applied and the corrected 50-sentence set to pass re-audit.
+
+Structure-lab smoke-test evidence should cover:
+- `verb-explorer.html` opens a curated lemma and a supported inflected-form alias;
+- an unknown verb produces the explicit unavailable state rather than invented morphology;
+- aspect-pair navigation stays inside curated entries;
+- Russian TTS buttons invoke `ru-RU` where browser TTS is available;
+- deep links to Aspect / Family / Prefix / Suffix pages resolve;
+- mobile layout does not hide the search field, word anatomy, or context examples.
