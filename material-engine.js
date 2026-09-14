@@ -1,7 +1,7 @@
 (function(){
   'use strict';
 
-  const VERSION = '0.1.0';
+  const VERSION = '0.1.1';
 
   function splitSlash(value){
     return typeof value === 'string' && value.length ? value.split('/') : [];
@@ -103,6 +103,16 @@
     return {version:VERSION,total:all.length,levels};
   }
 
+  function installAiMaterialNav(){
+    const nav=document.querySelector('header nav');
+    if(!nav || nav.querySelector('[data-rsl-ai-material]')) return;
+    const link=document.createElement('a');
+    link.href='ai-material.html';
+    link.dataset.rslAiMaterial='true';
+    link.textContent='🤖 AI Material';
+    nav.insertBefore(link,nav.firstChild);
+  }
+
   window.RSL_MATERIAL_ENGINE = {
     version: VERSION,
     normalizeLegacy,
@@ -113,4 +123,10 @@
     getById,
     stats
   };
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded',installAiMaterialNav,{once:true});
+  }else{
+    installAiMaterialNav();
+  }
 })();
