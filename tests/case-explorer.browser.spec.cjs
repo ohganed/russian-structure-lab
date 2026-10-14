@@ -66,3 +66,19 @@ test('six examples cycle back to the first and clear previous answers',async({pa
  await expect(page.locator('#progress')).toContainText('1 / 6');
  await expect(page.locator('#question')).toHaveText(initial);
 });
+
+test('every curated case accepts its own answer and reveals the matching explanation',async({page})=>{
+ await page.goto('http://127.0.0.1:8765/case-structure-explorer.html');
+ const examples=await page.evaluate(()=>window.RSL_CASE_EXAMPLES.map(e=>({question:e.question,correct:e.correct,reason:e.reason,explanation:e.explanation})));
+ expect(examples).toHaveLength(6);
+ for(let i=0;i<examples.length;i++){
+  const example=examples[i];
+  await expect(page.locator('#question')).toHaveText(example.question);
+  await expect(page.locator('#reason')).toContainText('解説は正解後');
+  await page.locator('#choices button').nth(example.correct).click();
+  await expect(page.locator('#feedback')).toContainText(example.explanation);
+  await expect(page.locator('#reason')).toHaveText(example.reason);
+  await expect(page.locator('#choices button:disabled')).toHaveCount(3);
+  if(i<examples.length-1)await page.locator('#next').click();
+ }
+});
