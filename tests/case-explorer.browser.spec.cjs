@@ -52,3 +52,17 @@ test('retry resets a completed answer and explanation',async({page})=>{
  await choices.nth(1).click();
  await expect(page.locator('#feedback')).toContainText('正解');
 });
+
+test('six examples cycle back to the first and clear previous answers',async({page})=>{
+ await page.goto('http://127.0.0.1:8765/case-structure-explorer.html');
+ const initial=await page.locator('#question').textContent();
+ for(let n=2;n<=6;n++){
+  await page.locator('#next').click();
+  await expect(page.locator('#progress')).toContainText(`${n} / 6`);
+  await expect(page.locator('#reason')).toContainText('解説は正解後');
+  await expect(page.locator('#feedback')).toBeEmpty();
+ }
+ await page.locator('#next').click();
+ await expect(page.locator('#progress')).toContainText('1 / 6');
+ await expect(page.locator('#question')).toHaveText(initial);
+});
