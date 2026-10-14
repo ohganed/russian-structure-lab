@@ -32,3 +32,16 @@ test('exercise loads data and protects explanations until success',()=>{
  assert.match(html,/if\(completed\)return/);
  assert.doesNotMatch(html,/localStorage\.(setItem|removeItem|clear)/);
 });
+
+test('all six curated examples cover core case relationships',()=>{
+ assert.equal(examples.length,6);
+ const roles=examples.flatMap(e=>e.tokens.map(t=>t.role));
+ for(const expected of ['主格','対格','生格','与格','造格','前置格']){
+  assert.ok(roles.some(role=>role.includes(expected)),`missing case: ${expected}`);
+ }
+ for(const e of examples){
+  assert.equal(e.question.split('_____').length,2,'exactly one blank per question');
+  assert.equal(new Set(e.choices).size,e.choices.length,'choices must be distinct');
+  assert.ok(e.tokens.map(t=>t.word).join(' ').replace(/\s+/g,' ').length>0);
+ }
+});
