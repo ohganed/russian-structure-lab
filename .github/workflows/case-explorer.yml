@@ -1,0 +1,22 @@
+name: Case Explorer checks
+on:
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'case-structure-explorer.html'
+      - 'case-structure-data.js'
+      - 'tests/case-explorer.test.cjs'
+      - '.github/workflows/case-explorer.yml'
+  workflow_dispatch:
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check case-structure-data.js
+      - run: node --test tests/case-explorer.test.cjs
