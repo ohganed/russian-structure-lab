@@ -1,0 +1,36 @@
+name: Case Explorer checks
+on:
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'case-structure-explorer.html'
+      - 'case-structure-data.js'
+      - 'tests/case-explorer.test.cjs'
+      - '.github/workflows/case-explorer.yml'
+      - 'tests/case-explorer.browser.spec.cjs'
+  workflow_dispatch:
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check case-structure-data.js
+      - run: node --test tests/case-explorer.test.cjs
+  browser:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save --no-package-lock @playwright/test
+      - run: npx playwright install --with-deps chromium webkit
+      - run: npx playwright test tests/case-explorer.browser.spec.cjs --browser chromium --workers 1
+      - run: npx playwright test tests/case-explorer.browser.spec.cjs --browser webkit --workers 1
