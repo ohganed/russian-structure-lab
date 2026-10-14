@@ -26,3 +26,15 @@ test('canonical Learn links to case explorer',async({page})=>{
  await page.getByRole('link',{name:/Learn に戻る/}).click();
  await expect(page).toHaveURL(/index\.html$/);
 });
+
+test('mobile touch viewport and audio failure are handled',async({browser})=>{
+ const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+ const page=await context.newPage();
+ await page.goto('http://127.0.0.1:8765/case-structure-explorer.html');
+ await expect(page.locator('#sentence button').first()).toHaveAttribute('aria-label',/を聞く/);
+ const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth);
+ expect(overflow).toBe(false);
+ await page.locator('#listen').tap();
+ await expect(page.locator('#sentence button').first()).toBeVisible();
+ await context.close();
+});
