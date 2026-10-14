@@ -38,3 +38,17 @@ test('mobile touch viewport and audio failure are handled',async({browser})=>{
  await expect(page.locator('#sentence button').first()).toBeVisible();
  await context.close();
 });
+
+test('retry resets a completed answer and explanation',async({page})=>{
+ await page.goto('http://127.0.0.1:8765/case-structure-explorer.html');
+ const choices=page.locator('#choices button');
+ await choices.nth(1).click();
+ await expect(page.locator('#reason')).not.toContainText('解説は正解後');
+ await expect(choices.nth(1)).toBeDisabled();
+ await page.locator('#retry').click();
+ await expect(page.locator('#reason')).toContainText('解説は正解後');
+ await expect(page.locator('#feedback')).toBeEmpty();
+ await expect(choices.nth(1)).toBeEnabled();
+ await choices.nth(1).click();
+ await expect(page.locator('#feedback')).toContainText('正解');
+});
