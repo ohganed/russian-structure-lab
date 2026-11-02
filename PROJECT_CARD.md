@@ -130,6 +130,16 @@ Code or review evidence exists, but the project must not describe these as fully
 
 Never use “complete”, “working”, “correct”, or equivalent for a major feature without repository evidence.
 
+## Mobile Learn controls — 2026-11-03
+
+State: **IMPLEMENTED / NOT VERIFIED ON IPHONE**.
+
+- Shared `ui-system.css?v=5` adds mobile-only horizontal header navigation, flexible Learn header, 57px learning-stage buttons and 44px minimum previous/next controls.
+- Previous/next controls now have Japanese accessible labels.
+- The lesson controls gain a mobile sticky area respecting the device's bottom safe inset.
+- Desktop cloud Chrome confirms canonical Learn loads after the change and retains stage controls, categories and material drawer.
+- Still needs actual iPhone Safari viewport, touch and scroll checks; desktop confirmation is not a mobile PASS.
+
 ## Typography unification — 2026-11-03
 
 State: **IMPLEMENTED / PARTIALLY VERIFIED**.
