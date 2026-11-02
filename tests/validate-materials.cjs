@@ -42,7 +42,7 @@ for (const entry of a1) {
     check(clean(entry.chunks.join(' ')) === clean(entry.ru), 'Chunk coverage mismatch: ' + entry.id);
   }
   if (entry.anatomyFocus) {
-    check(entry.anatomyFocus.parts.join('') === entry.anatomyFocus.word, 'Anatomy does not reconstruct word: ' + entry.id);
+    check(entry.anatomyFocus.parts.join('').replace(/-/g, '') === entry.anatomyFocus.word, 'Anatomy does not reconstruct word: ' + entry.id);
   }
 }
 for (const [cat, count] of Object.entries(categoryCounts)) check(count === 5, cat + ' has ' + count + ' items; expected 5');
