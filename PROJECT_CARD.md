@@ -130,6 +130,17 @@ Code or review evidence exists, but the project must not describe these as fully
 
 Never use “complete”, “working”, “correct”, or equivalent for a major feature without repository evidence.
 
+## Shared UI language — 2026-11-03
+
+State: **IMPLEMENTED / PARTIALLY VERIFIED**.
+
+- Added `ui-system.css` and linked it from 13 application HTML surfaces.
+- Unified warm paper/cream backgrounds, softer sage-green accents, muted text, border tones, focus indicators, and reduced-motion handling.
+- Deliberately preserved each feature's layout and JavaScript to reduce regression risk.
+- Verified all 13 HTML files reference the shared stylesheet and the feature-guide page still renders in desktop cloud Chrome.
+
+Pending: iPhone Safari visual comparison; repeated control-state and layout checks for all 13 pages; further consolidation of header/navigation and component sizes. This is design-system phase 1, not full UI parity.
+
 ## Feature discovery — 2026-11-03
 
 State: **IMPLEMENTED / PARTIALLY VERIFIED**.
