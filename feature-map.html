@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>機能を探す · Russian Structure Lab</title>
+<style>
+:root{--ink:#18211e;--muted:#66736d;--paper:#f3f0e8;--card:#fffefa;--green:#285e50;--line:#d8d5cc;--light:#e6eee8}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",Arial,sans-serif}
+a{color:inherit;text-decoration:none}header{padding:14px max(18px,4vw);display:flex;justify-content:space-between;align-items:center;gap:10px;border-bottom:1px solid var(--line);background:#f3f0e8ee;position:sticky;top:0;z-index:3;backdrop-filter:blur(12px)}
+.brand{font:19px Georgia,serif}.back{padding:10px 13px;border:1px solid var(--line);border-radius:18px;background:var(--card);font-size:13px}
+main{width:min(1100px,94vw);margin:auto;padding:38px 0 80px}h1{font:clamp(36px,6vw,62px)/1.14 Georgia,serif;margin:10px 0}.lead{color:var(--muted);line-height:1.8;max-width:690px}
+.search{margin:28px 0 14px;display:flex;align-items:center;gap:10px;padding:14px 17px;background:var(--card);border:1px solid var(--line);border-radius:18px}
+.search input{border:0;background:transparent;outline:0;flex:1;min-width:0;font:18px inherit;font-size:17px;color:var(--ink)}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:23px}.filters button{border:1px solid var(--line);background:var(--card);border-radius:18px;padding:9px 14px;font:13px inherit;cursor:pointer}.filters button.active{background:var(--ink);color:#fff}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.tile{display:flex;flex-direction:column;gap:9px;background:var(--card);padding:20px;border:1px solid var(--line);border-radius:20px;min-height:165px;transition:transform .16s,border-color .16s}.tile:hover,.tile:focus-visible{transform:translateY(-2px);border-color:var(--green);outline:none}.tile .emoji{font-size:27px}.tile strong{font-size:18px}.tile p{font-size:13px;color:var(--muted);line-height:1.6;margin:0;flex:1}.tile small{font-size:11px;color:var(--green)}.tile[hidden]{display:none}
+.sectionTitle{font-size:13px;margin:33px 0 12px;color:var(--muted);letter-spacing:.04em}.empty{display:none;background:var(--card);padding:25px;text-align:center;border-radius:18px;color:var(--muted)}
+footer{margin-top:40px;font-size:12px;color:var(--muted);line-height:1.8}
+@media(max-width:800px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:560px){main{padding-top:24px}.grid{grid-template-columns:1fr}.tile{min-height:130px}.brand{font-size:15px}}
+</style>
+</head>
+<body>
+<header><a class="brand" href="index.html">Я Russian Structure Lab</a><a class="back" href="index.html">← 学習画面へ</a></header>
+<main>
+<div>🧭 FUNCTION GUIDE</div><h1>何をしたいですか？</h1>
+<p class="lead">教材を読む、AIで分析した文章を取り込む、動詞を分解する。目的から選べます。既存の画面はそのまま使えます。</p>
+<label class="search">🔎 <input id="search" type="search" placeholder="例：動詞、AI、格、接頭辞、教材" aria-label="機能を検索" autocomplete="off"></label>
+<div class="filters" role="group" aria-label="機能の分類">
+<button data-filter="all" class="active" aria-pressed="true">すべて</button>
+<button data-filter="learn" aria-pressed="false">📖 学ぶ</button>
+<button data-filter="make" aria-pressed="false">✍️ 教材を作る</button>
+<button data-filter="analyze" aria-pressed="false">🧠 構造を調べる</button>
+<button data-filter="check" aria-pressed="false">🧪 確認する</button>
+</div>
+<div class="grid" id="grid">
+<a class="tile" data-group="learn" data-keywords="learn sentence situation audio A1 ロシア語 学習 音声 例文" href="index.html"><span class="emoji">📖</span><strong>教材で学ぶ</strong><p>A1〜C2を選び、状況・単語・文・音声の順に学びます。</p><small>Learn →</small></a>
+<a class="tile" data-group="make" data-keywords="ai material 整形文 解析結果 コピー プロンプト インポート" href="ai-material.html"><span class="emoji">🤖</span><strong>AIで分析した文章を取り込む</strong><p>分析プロンプトをコピーし、AIの解析結果を教材として読み込みます。</p><small>AI Material →</small></a>
+<a class="tile" data-group="make" data-keywords="my material 自分の文章 入力 教材化 ローカル 単語" href="my-material.html"><span class="emoji">✍️</span><strong>自分の文章を調べる</strong><p>ロシア語を入力し、単語や構造を選んで深掘りします。</p><small>My Material →</small></a>
+<a class="tile" data-group="analyze" data-keywords="verb explorer 動詞 活用 不完了体 完了体 語幹 分析" href="verb-explorer.html"><span class="emoji">🧠</span><strong>動詞を詳しく分析する</strong><p>対応済みの動詞について体・語形・構造・語族をまとめて見ます。</p><small>Verb Explorer →</small></a>
+<a class="tile" data-group="analyze" data-keywords="aspect lab 動詞 完了体 不完了体 アスペクト" href="aspect-lab.html"><span class="emoji">🔄</span><strong>完了体と不完了体を比べる</strong><p>同じ出来事をどう捉えるか、二つの体の違いを探索します。</p><small>Aspect Lab →</small></a>
+<a class="tile" data-group="analyze" data-keywords="morphology hub 形態素 動詞 構造 ラボ 一覧" href="morphology-hub.html"><span class="emoji">🧬</span><strong>形態素の研究室を探す</strong><p>接頭辞・接尾辞・語族などの専門ラボへ移動します。</p><small>Morphology Hub →</small></a>
+<a class="tile" data-group="analyze" data-keywords="prefix lab 接頭辞 動詞 意味" href="prefix-lab.html"><span class="emoji">↗️</span><strong>接頭辞を比較する</strong><p>動詞の前に付く要素が持つ意味の傾向を比較します。</p><small>Prefix Lab →</small></a>
+<a class="tile" data-group="analyze" data-keywords="suffix lab 接尾辞 動詞 語幹 活用" href="suffix-lab.html"><span class="emoji">🧩</span><strong>接尾辞・語幹を調べる</strong><p>動詞形成や語幹交替の例を比較します。</p><small>Suffix Lab →</small></a>
+<a class="tile" data-group="analyze" data-keywords="word family lab 語族 語根 派生 関連語" href="word-family-lab.html"><span class="emoji">🌳</span><strong>語族をたどる</strong><p>共通する語根から関連語のつながりを見ます。</p><small>Word Family Lab →</small></a>
+<a class="tile" data-group="check" data-keywords="curriculum A1 A2 B1 B2 C1 C2 教材数 レベル 進捗" href="level-browser.html"><span class="emoji">📚</span><strong>教材のレベルと進捗を見る</strong><p>A1〜C2の教材登録状況を確認します。</p><small>Curriculum →</small></a>
+<a class="tile" data-group="check" data-keywords="morphology check 形態素 検証 整合性 テスト" href="morphology-check.html"><span class="emoji">🧪</span><strong>形態素データを検査する</strong><p>登録済み分析データの内部整合性を確認します。</p><small>Morphology Check →</small></a>
+<a class="tile" data-group="learn" data-keywords="legacy 旧教材 過去の教材 昔の画面" href="legacy-index.html"><span class="emoji">🕰️</span><strong>以前の教材を開く</strong><p>移行前の学習画面・教材を残しています。</p><small>Legacy →</small></a>
+</div>
+<div class="empty" id="empty">一致する機能がありません。別の言葉で検索してください。</div>
+<footer>※ 画面への案内であり、個々の動詞や教材がすべて検証済みという意味ではありません。新しい機能はここに追加していきます。</footer>
+</main>
+<script>
+const search=document.getElementById('search');
+const tiles=[...document.querySelectorAll('.tile')];
+const buttons=[...document.querySelectorAll('[data-filter]')];
+let group='all';
+function update(){
+ const q=search.value.trim().toLocaleLowerCase();
+ let shown=0;
+ for(const tile of tiles){
+  const text=(tile.textContent+' '+tile.dataset.keywords).toLocaleLowerCase();
+  const visible=(group==='all'||tile.dataset.group===group)&&(!q||text.includes(q));
+  tile.hidden=!visible;if(visible)shown++;
+ }
+ document.getElementById('empty').style.display=shown?'none':'block';
+}
+search.addEventListener('input',update);
+for(const button of buttons)button.addEventListener('click',()=>{
+ group=button.dataset.filter;
+ for(const b of buttons){const active=b===button;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active));}
+ update();
+});
+</script>
+</body></html>
