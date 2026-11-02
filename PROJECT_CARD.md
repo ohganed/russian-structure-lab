@@ -19,8 +19,8 @@ Work proceeds in this order unless this file is explicitly changed:
 1. ✅ Introduce `PROJECT_CARD.md` and GitHub Source-of-Truth rules.
 2. ✅ Unify the legacy and new material engines.
 3. 🟡 Integrate A1–C2 selection into the main Learn UI — implemented; browser/device verification pending.
-4. 🟡 Run Educational Validity Gate on the A1 50-sentence calibration set — audit completed; corrections/re-audit pending.
-5. ⏳ Add automated validation.
+4. 🟡 Run Educational Validity Gate on the A1 50-sentence calibration set — five corrections and nine pedagogical notes committed; independent re-audit pending.
+5. 🟡 Add automated validation — Node validator and GitHub Actions workflow committed; CI run confirmation pending.
 6. ⏳ Expand A1 from 50 to 500 validated sentences.
 7. ⏳ Expand A2 → B1 → B2 → C1 → C2.
 
@@ -61,7 +61,7 @@ Code or review evidence exists, but the project must not describe these as fully
 - Prefix / suffix / word-family explanations in the structure labs require independent linguistic review before being described as a validated morphology reference.
 - Cross-browser/mobile behavior of Aspect Lab, Word Family Lab, Prefix Lab, Suffix Lab, Morphology Hub, and Verb Structure Explorer.
 - 📱 Mobile navigation and layout across current iPhone/Safari versions.
-- A1 EVG has identified 5 required revisions and several pedagogical-note requirements; corrected dataset has not yet passed re-audit.
+- A1 EVG's 5 required revisions and 9 pedagogical notes are committed; corrected dataset has not yet passed an independent re-audit.
 
 ## 🔵 DECIDED
 - GitHub `main` is the project Source of Truth.
@@ -81,7 +81,7 @@ Code or review evidence exists, but the project must not describe these as fully
 - Legacy material is preserved during migration and never silently promoted into a CEFR level.
 
 ## ⚪ PLANNED
-- Apply all A1 EVG corrections and pedagogical metadata.
+- Independently re-audit the corrected A1 corpus and validate the explanatory notes in the Learn UI.
 - Automated curriculum schema validation, duplicate checks, ID checks, coverage checks, and selected pedagogical checks.
 - Centralize curated morphology/aspect entries into one shared data source so `aspect-lab.html`, `word-family-lab.html`, `prefix-lab.html`, `suffix-lab.html`, and `verb-explorer.html` cannot silently drift apart.
 - Add automated consistency checks for aspect pairs, morphology labels, deep-link targets, and curated entry IDs.
@@ -96,7 +96,7 @@ Code or review evidence exists, but the project must not describe these as fully
 2. A2–C2 curriculum slots exist but their calibration corpora are not yet populated.
 3. My Material is still largely Japanese-pathway oriented.
 4. Some morphology is heuristic/local estimation and must not be treated as linguistically verified.
-5. Automated repository validation is not yet installed.
+5. Automated repository validation is installed in `tests/validate-materials.cjs` and `.github/workflows/validate-materials.yml`; actual GitHub Actions PASS evidence is pending.
 6. Canonical Learn integration requires real browser/device verification before Step 3 can be marked PASS.
 7. Legacy Learn has features not yet migrated to canonical Learn; `legacy-index.html` remains available during migration.
 8. Structure-lab data is currently duplicated across several standalone HTML pages, so semantic explanations can drift until a shared morphology data module is introduced.
@@ -113,7 +113,7 @@ Code or review evidence exists, but the project must not describe these as fully
 ## 📊 Current curriculum evidence
 | Level | Calibration data | Final target | Evidence state |
 |---|---:|---:|---|
-| A1 | 50 | 500 | 🟡 EVG audit completed; corrections/re-audit pending |
+| A1 | 50 | 500 | 🟡 Five corrections and nine notes committed; independent re-audit pending |
 | A2 | 0 | 500 | ⚪ not started |
 | B1 | 0 | 500 | ⚪ not started |
 | B2 | 0 | 500 | ⚪ not started |
