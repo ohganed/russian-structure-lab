@@ -6,7 +6,7 @@ Target: **3,000 sentences** = 500 per CEFR level × 6 levels.
 
 | Level | Calibration | Target | Status |
 |---|---:|---:|---|
-| A1 | 50 / 50 | 500 | 🟡 Calibration set created; Educational Validity Gate next |
+| A1 | 50 / 50 | 500 | 🟡 Five corrections and nine pedagogical notes committed; independent re-audit pending |
 | A2 | 0 / 50 | 500 | ⚪ Not started |
 | B1 | 0 / 50 | 500 | ⚪ Not started |
 | B2 | 0 / 50 | 500 | ⚪ Not started |
@@ -18,8 +18,8 @@ Target: **3,000 sentences** = 500 per CEFR level × 6 levels.
 - ✅ Legacy and modern data are exposed through `material-engine.js`.
 - 🟡 Canonical `index.html` now includes A1–C2 selection and category filtering; real-browser/device verification is pending.
 - ✅ Previous full Learn UI is preserved as `legacy-index.html` during migration.
-- ⏳ A1 Educational Validity Gate has not yet run.
-- ⏳ Automated validation has not yet been installed.
+- 🟡 A1 Educational Validity Gate audit completed; revisions and notes committed; independent re-audit pending.
+- 🟡 Automated Node validation and GitHub Actions workflow committed; CI PASS evidence pending.
 
 ## Data architecture in repo
 - `PROJECT_CARD.md` — canonical project state and next evidence step.
