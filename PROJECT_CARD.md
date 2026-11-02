@@ -28,6 +28,7 @@ Work proceeds in this order unless this file is explicitly changed:
 Repository evidence exists for these items.
 
 - Main GitHub Pages app exists in `index.html`.
+- A searchable task-first navigation guide exists at `feature-map.html`, linking 12 verified page destinations grouped by learner intent; entry links are added to Learn, AI Material, My Material, and Verb Explorer.
 - The previous full Learn implementation is preserved as `legacy-index.html` before the canonical Learn migration.
 - Existing legacy lesson corpus exists in `materials.js` and is preserved unchanged.
 - CEFR curriculum definition exists in `curriculum.js`.
@@ -61,6 +62,7 @@ Code or review evidence exists, but the project must not describe these as fully
 - Prefix / suffix / word-family explanations in the structure labs require independent linguistic review before being described as a validated morphology reference.
 - Cross-browser/mobile behavior of Aspect Lab, Word Family Lab, Prefix Lab, Suffix Lab, Morphology Hub, and Verb Structure Explorer.
 - 📱 Mobile navigation and layout across current iPhone/Safari versions.
+- The new feature guide has been tested in desktop cloud Chrome for page display, keyword filtering, and group filtering; iPhone Safari accessibility/layout remains unverified.
 - A1 EVG's 5 required revisions and 9 pedagogical notes are committed; corrected dataset has not yet passed an independent re-audit.
 
 ## 🔵 DECIDED
@@ -127,6 +129,18 @@ Code or review evidence exists, but the project must not describe these as fully
 - **IMPLEMENTED / NOT VERIFIED** — code exists, but verification is incomplete.
 
 Never use “complete”, “working”, “correct”, or equivalent for a major feature without repository evidence.
+
+## Feature discovery — 2026-11-03
+
+State: **IMPLEMENTED / PARTIALLY VERIFIED**.
+
+- Created `feature-map.html` with 12 curated feature destinations, task-first groups, and keyword filtering.
+- Added an obvious Function Guide entry in canonical Learn, AI Material, My Material, and Verb Explorer.
+- Confirmed the public page loads and that a keyword search for 動詞 filters destinations.
+- Confirmed the 教材を作る filter displays AI Material and My Material.
+- Confirmed canonical Learn shows the guide link after refreshing the deployed HTML; stale cached HTML may temporarily show the previous navigation.
+
+Pending: iPhone Safari layout and full link-by-link destination testing.
 
 ## Browser smoke test — 2026-11-03
 
