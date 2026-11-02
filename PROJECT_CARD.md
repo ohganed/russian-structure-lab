@@ -130,6 +130,16 @@ Code or review evidence exists, but the project must not describe these as fully
 
 Never use “complete”, “working”, “correct”, or equivalent for a major feature without repository evidence.
 
+## Typography unification — 2026-11-03
+
+State: **IMPLEMENTED / PARTIALLY VERIFIED**.
+
+- Shared `ui-system.css?v=4` now sets a consistent line-height, heading rhythm, body explanation text, button label styles and mobile text spacing across 13 pages.
+- Retains large Russian learning text and page-specific layout rules.
+- Browser-verified the canonical Learn surface, Situation → Words transition, and selecting `встаю` to open the detail drawer.
+- Observed existing metadata gap: `встаю` in the A1 calibration item displays `意味データは未登録` / `未解析`. This is content metadata work, not a UI regression.
+- iPhone Safari visual and touch verification remains pending.
+
 ## UI navigation consistency — 2026-11-03
 
 State: **IMPLEMENTED / PARTIALLY VERIFIED**.
