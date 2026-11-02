@@ -130,6 +130,16 @@ Code or review evidence exists, but the project must not describe these as fully
 
 Never use “complete”, “working”, “correct”, or equivalent for a major feature without repository evidence.
 
+## UI navigation consistency — 2026-11-03
+
+State: **IMPLEMENTED / PARTIALLY VERIFIED**.
+
+- Added common Function Guide navigation to `level-browser.html` and `legacy-index.html`, completing guide access from all 12 non-guide pages.
+- Browser-verified Curriculum → Function Guide and Function Guide → Legacy, with the Legacy Learn interface preserved.
+- Added `tests/validate-ui.cjs` and GitHub Actions invocation to detect missing stylesheet links, missing guide links, broken local HTML links, and feature-map destination duplication.
+- Independently checked the current 13-page data via repository reads: 12 guide tiles, 12 unique destinations, zero static-link consistency issues.
+- GitHub Actions run status and actual iPhone Safari responsive/touch behavior are still NOT VERIFIED.
+
 ## Softer controls and specialist navigation — 2026-11-03
 
 State: **IMPLEMENTED / PARTIALLY VERIFIED**.
