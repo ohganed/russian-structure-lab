@@ -109,3 +109,42 @@ button { line-height:1.35; }
   header nav a,header .back,.topbar .btn { padding:9px 10px; }
   .tile,.panel,.card { border-radius:18px; }
 }
+
+
+/* Learn mobile comfort: preserve desktop two-column learning layout. */
+@media (max-width:600px) {
+  body:has(.shell) header {
+    display:flex;
+    flex-wrap:wrap;
+    height:auto;
+    min-height:64px;
+    gap:8px;
+    padding:10px 14px;
+  }
+  body:has(.shell) header .brand { flex:0 0 auto; }
+  body:has(.shell) header nav {
+    width:100%;
+    display:flex;
+    gap:7px;
+    flex-wrap:nowrap;
+    justify-content:flex-start;
+    overflow-x:auto;
+    overscroll-behavior-x:contain;
+    padding:2px 0 6px;
+    scrollbar-width:none;
+  }
+  body:has(.shell) header nav::-webkit-scrollbar { display:none; }
+  body:has(.shell) header nav a { white-space:nowrap; flex:0 0 auto; min-height:39px; }
+  body:has(.shell) .flow button { min-height:57px; border-radius:14px; }
+  body:has(.shell) .controls {
+    position:sticky;
+    bottom:0;
+    z-index:8;
+    padding:10px 8px max(10px,env(safe-area-inset-bottom));
+    background:rgba(247,244,238,.96);
+    backdrop-filter:blur(12px);
+    border-radius:18px 18px 0 0;
+  }
+  body:has(.shell) .controls button { min-width:44px; min-height:44px; }
+  body:has(.shell) .categorybar { overscroll-behavior-x:contain; }
+}
