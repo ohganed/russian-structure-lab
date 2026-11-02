@@ -8,9 +8,9 @@ window.RSL_A1_CALIBRATION = [
 
 // 👥 People & Relationships
 {id:'A1-PR-001',level:'A1',category:'PR',subCategory:'introduction',ru:'Меня зовут Анна.',jp:'私の名前はアンナです。',en:'My name is Anna.',chunks:['Меня зовут','Анна'],caseFocus:['Accusative'],scene:'👋🙂'},
-{id:'A1-PR-002',level:'A1',category:'PR',subCategory:'family',ru:'Это мой брат.',jp:'これは私の兄弟です。',en:'This is my brother.',chunks:['Это','мой брат'],scene:'👨‍👩‍👧'},
+{id:'A1-PR-002',level:'A1',category:'PR',subCategory:'family',ru:'Это мой брат.',jp:'こちらは私の兄または弟です。',en:'This is my brother.',chunks:['Это','мой брат'],scene:'👨‍👩‍👧'},
 {id:'A1-PR-003',level:'A1',category:'PR',subCategory:'friend',ru:'Я говорю с другом.',jp:'私は友人と話します。',en:'I speak with a friend.',chunks:['Я говорю','с другом'],caseFocus:['Instrumental'],scene:'👥💬'},
-{id:'A1-PR-004',level:'A1',category:'PR',subCategory:'family',ru:'У меня есть сестра.',jp:'私には姉妹がいます。',en:'I have a sister.',chunks:['У меня','есть сестра'],caseFocus:['Genitive'],scene:'👨‍👩‍👧'},
+{id:'A1-PR-004',level:'A1',category:'PR',subCategory:'family',ru:'У меня есть сестра.',jp:'私には姉または妹がいます。',en:'I have a sister.',chunks:['У меня','есть сестра'],caseFocus:['Genitive'],scene:'👨‍👩‍👧'},
 {id:'A1-PR-005',level:'A1',category:'PR',subCategory:'meeting',ru:'Мы встречаемся в кафе.',jp:'私たちはカフェで会います。',en:'We meet at a café.',chunks:['Мы встречаемся','в кафе'],caseFocus:['Prepositional'],aspectFocus:{impf:'встречаться',pf:'встретиться'},scene:'☕👋'},
 
 // 💼 Work & Study
@@ -25,7 +25,7 @@ window.RSL_A1_CALIBRATION = [
 {id:'A1-TM-002',level:'A1',category:'TM',subCategory:'transport',ru:'Мы едем на автобусе.',jp:'私たちはバスで行きます。',en:'We are going by bus.',chunks:['Мы едем','на автобусе'],caseFocus:['Prepositional'],scene:'🚌➡️'},
 {id:'A1-TM-003',level:'A1',category:'TM',subCategory:'station',ru:'Поезд стоит на станции.',jp:'列車は駅に停まっています。',en:'The train is standing at the station.',chunks:['Поезд стоит','на станции'],caseFocus:['Prepositional'],scene:'🚆🚉'},
 {id:'A1-TM-004',level:'A1',category:'TM',subCategory:'direction',ru:'Она идёт в магазин.',jp:'彼女は店へ歩いて行きます。',en:'She is walking to the shop.',chunks:['Она идёт','в магазин'],caseFocus:['Accusative'],scene:'🚶🛒'},
-{id:'A1-TM-005',level:'A1',category:'TM',subCategory:'arrival',ru:'Автобус уже приехал.',jp:'バスはもう到着しました。',en:'The bus has already arrived.',chunks:['Автобус','уже приехал'],aspectFocus:{impf:'приезжать',pf:'приехать'},anatomyFocus:{word:'приехал',parts:['при-','ех','-ал']},scene:'🚌📍'},
+{id:'A1-TM-005',level:'A1',category:'TM',subCategory:'arrival',ru:'Автобус уже приехал.',jp:'バスはもう到着しました。',en:'The bus has already arrived.',chunks:['Автобус','уже приехал'],aspectFocus:{impf:'приезжать',pf:'приехать'},anatomyFocus:{word:'приехал',parts:['при-','ех','-а-','-л']},scene:'🚌📍'},
 
 // 🍽️ Food & Shopping
 {id:'A1-FS-001',level:'A1',category:'FS',subCategory:'breakfast',ru:'Я пью чай утром.',jp:'私は朝に紅茶を飲みます。',en:'I drink tea in the morning.',chunks:['Я пью чай','утром'],caseFocus:['Instrumental'],scene:'☕🌅'},
@@ -52,7 +52,7 @@ window.RSL_A1_CALIBRATION = [
 {id:'A1-SI-001',level:'A1',category:'SI',subCategory:'news',ru:'Я читаю новости утром.',jp:'私は朝にニュースを読みます。',en:'I read the news in the morning.',chunks:['Я читаю новости','утром'],caseFocus:['Accusative','Instrumental'],scene:'📰🌅'},
 {id:'A1-SI-002',level:'A1',category:'SI',subCategory:'phone',ru:'У меня новый телефон.',jp:'私は新しい電話を持っています。',en:'I have a new phone.',chunks:['У меня','новый телефон'],caseFocus:['Genitive'],scene:'📱'},
 {id:'A1-SI-003',level:'A1',category:'SI',subCategory:'message',ru:'Он пишет сообщение другу.',jp:'彼は友人にメッセージを書いています。',en:'He writes a message to a friend.',chunks:['Он пишет сообщение','другу'],caseFocus:['Accusative','Dative'],scene:'💬📱'},
-{id:'A1-SI-004',level:'A1',category:'SI',subCategory:'internet',ru:'Интернет сегодня не работает.',jp:'今日はインターネットが動きません。',en:'The internet is not working today.',chunks:['Интернет','сегодня не работает'],scene:'🌐❌'},
+{id:'A1-SI-004',level:'A1',category:'SI',subCategory:'internet',ru:'Интернет сегодня не работает.',jp:'今日はインターネットがつながりません。',en:'The internet is not working today.',chunks:['Интернет','сегодня не работает'],scene:'🌐❌'},
 {id:'A1-SI-005',level:'A1',category:'SI',subCategory:'time',ru:'Сейчас пять часов.',jp:'今は5時です。',en:'It is five o’clock now.',chunks:['Сейчас','пять часов'],scene:'🕔'},
 
 // 🧠 Thought & Opinion
@@ -67,7 +67,7 @@ window.RSL_A1_CALIBRATION = [
 {id:'A1-CE-002',level:'A1',category:'CE',subCategory:'film',ru:'Мы смотрим новый фильм.',jp:'私たちは新しい映画を見ています。',en:'We are watching a new film.',chunks:['Мы смотрим','новый фильм'],caseFocus:['Accusative'],scene:'🎬'},
 {id:'A1-CE-003',level:'A1',category:'CE',subCategory:'reading',ru:'Она читает книгу по-русски.',jp:'彼女はロシア語で本を読んでいます。',en:'She reads a book in Russian.',chunks:['Она читает книгу','по-русски'],caseFocus:['Accusative'],scene:'📚🇷🇺'},
 {id:'A1-CE-004',level:'A1',category:'CE',subCategory:'song',ru:'Эта песня очень красивая.',jp:'この歌はとても美しいです。',en:'This song is very beautiful.',chunks:['Эта песня','очень красивая'],scene:'🎶✨'},
-{id:'A1-CE-005',level:'A1',category:'CE',subCategory:'museum',ru:'Мы идём в музей сегодня.',jp:'私たちは今日博物館へ行きます。',en:'We are going to the museum today.',chunks:['Мы идём','в музей','сегодня'],caseFocus:['Accusative'],scene:'🏛️🚶'}
+{id:'A1-CE-005',level:'A1',category:'CE',subCategory:'museum',ru:'Сегодня мы идём в музей.',jp:'私たちは今日博物館へ行きます。',en:'We are going to the museum today.',chunks:['Сегодня','мы идём','в музей'],caseFocus:['Accusative'],scene:'🏛️🚶'}
 ];
 
 window.RSL_A1_CALIBRATION_META = {
