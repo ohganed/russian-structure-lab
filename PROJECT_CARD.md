@@ -128,6 +128,26 @@ Code or review evidence exists, but the project must not describe these as fully
 
 Never use “complete”, “working”, “correct”, or equivalent for a major feature without repository evidence.
 
+## Browser smoke test — 2026-11-03
+
+State: **PARTIAL PASS / NOT FULLY VERIFIED**.
+
+Observed on the public GitHub Pages Learn UI in a desktop cloud Chrome browser:
+- A1 displays 50 materials.
+- A2 shows 0 / 500 and an explicit empty-data message.
+- Returning from A2 to A1 resets to 1 / 50 without a stale-index error.
+- Category filtering reaches BE and NE; BE displays 1 / 5.
+- The A1-BE-001 pedagogical note expands and displays the masculine/feminine устал / устала explanation.
+- Legacy remains accessible and displays 1 / 97 as unclassified material.
+
+Not yet verified:
+- B1, B2, C1, and C2 selections individually.
+- Actual audible Russian output (not just TTS button presence).
+- iPhone Safari and iPad browser behavior.
+- All category and word/chunk interactions.
+
+This does not promote Step 3 to full PASS.
+
 ## ➡️ NEXT EVIDENCE STEP
 **Complete Step 3 browser verification, while applying the Step 4 A1 corrections already identified. In parallel, run a browser smoke test and linguistic consistency audit for the new structure-lab pages before promoting them beyond IMPLEMENTED / NOT VERIFIED.**
 
