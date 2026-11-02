@@ -83,3 +83,6 @@ input:focus,textarea:focus,select:focus {
 @media (hover:hover) {
   .tile:hover,.recard:hover { background:#fafff9; border-color:#bad1bf; }
 }
+
+/* Explicit state selectors from older screens */
+.filters button.active,.levelbar button.on,.flow button.on,.navbtn.active { background:#456f5c; color:#fff; border-color:#456f5c; }
