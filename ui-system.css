@@ -1,0 +1,49 @@
+/* Russian Structure Lab — shared gentle visual language, v1.
+   Applied after page-local styles. Layout-specific rules stay in each page. */
+:root {
+  --ink:#2b3833;
+  --i:#2b3833;
+  --muted:#68776f;
+  --m:#68776f;
+  --paper:#f7f4ee;
+  --p:#f7f4ee;
+  --cream:#fffdf9;
+  --c:#fffdf9;
+  --card:#fffdf9;
+  --green:#527967;
+  --g:#527967;
+  --line:#e3ded4;
+  --l:#e3ded4;
+  --red:#ac6257;
+  --r:#ac6257;
+  --gold:#ac9468;
+  --a:#ac9468;
+  --focus:#fff1d5;
+  --f:#fff1d5;
+}
+html { -webkit-text-size-adjust:100%; text-size-adjust:100%; }
+body { color:var(--ink); background:var(--paper); font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",Arial,sans-serif; }
+header,.topbar { background:rgba(247,244,238,.96); border-bottom-color:var(--line); }
+button,input,textarea,select { font-family:inherit; }
+button,a,input,textarea,select,summary { -webkit-tap-highlight-color:transparent; }
+button { transition:background-color .18s ease,border-color .18s ease,color .18s ease; }
+button:not([class]),.btn,.pill,.back,.tile,.panel,.card,.box {
+  border-color:var(--line);
+}
+nav a,.btn,.pill,.back,.tile,.panel,.card,.box {
+  border-radius:16px;
+}
+input,textarea,select {
+  border-color:var(--line);
+  background-color:var(--cream);
+  color:var(--ink);
+}
+input::placeholder,textarea::placeholder { color:#829087; opacity:1; }
+:focus-visible { outline:3px solid #a4c9b4; outline-offset:3px; }
+a:focus-visible,button:focus-visible,summary:focus-visible { border-radius:10px; }
+@media (hover:hover) {
+  a:hover { text-decoration-color:var(--green); }
+}
+@media (prefers-reduced-motion:reduce) {
+  *,*::before,*::after { scroll-behavior:auto!important; animation-duration:.01ms!important; transition-duration:.01ms!important; }
+}
