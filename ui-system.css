@@ -86,3 +86,26 @@ input:focus,textarea:focus,select:focus {
 
 /* Explicit state selectors from older screens */
 .filters button.active,.levelbar button.on,.flow button.on,.navbtn.active { background:#456f5c; color:#fff; border-color:#456f5c; }
+
+
+/* Shared type rhythm — retain large Russian learner text and page-specific layouts. */
+body { line-height:1.55; }
+h1,h2,h3 { color:var(--ink); letter-spacing:-.02em; }
+h1 { line-height:1.2; }
+h2 { line-height:1.3; }
+.hero p,.lead,.intro p {
+  color:var(--muted);
+  font-size:clamp(14px,1.35vw,16px);
+  line-height:1.8;
+}
+.tile p,.panel p,.card p { line-height:1.7; }
+.eyebrow,.paneLabel,.label { letter-spacing:.08em; }
+header small,.brand small { font-size:10px; letter-spacing:.08em; }
+header nav a,header .back,.topbar .btn { font-size:13px; font-weight:500; }
+button { line-height:1.35; }
+@media (max-width:600px) {
+  h1 { letter-spacing:-.025em; }
+  .hero p,.lead,.intro p { font-size:14px; line-height:1.75; }
+  header nav a,header .back,.topbar .btn { padding:9px 10px; }
+  .tile,.panel,.card { border-radius:18px; }
+}
