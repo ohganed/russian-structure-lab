@@ -47,3 +47,39 @@ a:focus-visible,button:focus-visible,summary:focus-visible { border-radius:10px;
 @media (prefers-reduced-motion:reduce) {
   *,*::before,*::after { scroll-behavior:auto!important; animation-duration:.01ms!important; transition-duration:.01ms!important; }
 }
+
+
+/* Softer component surfaces: visual-only; existing click behavior is unchanged. */
+button { border-radius:14px; }
+header nav a,header .back,.topbar .btn,.topbar .iconbtn {
+  display:inline-flex; align-items:center; justify-content:center;
+  min-height:36px;
+  padding:8px 12px;
+  border:1px solid var(--line);
+  border-radius:18px;
+  background:var(--cream);
+  color:var(--ink);
+  text-decoration:none;
+  box-shadow:0 1px 2px rgba(45,57,49,.035);
+}
+header nav a:hover,header .back:hover,.topbar .btn:hover {
+  background:#edf3ec;
+  border-color:#c5d7c8;
+}
+.tile,.panel,.card,.box,.situationCard,.recard {
+  border-color:var(--line);
+  border-radius:19px;
+  box-shadow:0 2px 9px rgba(62,72,59,.035);
+}
+.levelbar button.on,.flow button.on,.navbtn.active,
+.btn.primary,.pill.primary,button.primary,.make,.start {
+  background:#456f5c;
+  color:#fff;
+  border-color:#456f5c;
+}
+input:focus,textarea:focus,select:focus {
+  border-color:#92b5a0;
+}
+@media (hover:hover) {
+  .tile:hover,.recard:hover { background:#fafff9; border-color:#bad1bf; }
+}
