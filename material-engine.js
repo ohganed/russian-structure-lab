@@ -71,6 +71,7 @@
       grammarFocus: Array.isArray(item.grammarFocus) ? item.grammarFocus : [],
       register: item.register || null,
       notes: item.notes || null,
+      pedagogicalNote: item.pedagogicalNote || null,
       source: item.source || 'curriculum',
       sourceShape: 'normalized-object',
       verification: item.verification || 'NOT VERIFIED'
