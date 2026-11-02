@@ -130,6 +130,15 @@ Code or review evidence exists, but the project must not describe these as fully
 
 Never use “complete”, “working”, “correct”, or equivalent for a major feature without repository evidence.
 
+## Softer controls and specialist navigation — 2026-11-03
+
+State: **IMPLEMENTED / PARTIALLY VERIFIED**.
+
+- Shared `ui-system.css?v=3` provides rounded buttons, cream navigation pills, subtle panel shadows, sage active controls and restrained hover/focus states on all 13 HTML surfaces.
+- Standardized Morphology Hub, Aspect Lab, Prefix Lab, Suffix Lab, Word Family Lab and Morphology Check headers to expose `🧭 機能を探す` and `← Learn` consistently.
+- Desktop cloud Chrome confirms the Feature Guide still renders with the updated controls.
+- Remaining: normalize other specialized headers and validate iPhone Safari tap targets, layout and contrast.
+
 ## Shared UI language — 2026-11-03
 
 State: **IMPLEMENTED / PARTIALLY VERIFIED**.
