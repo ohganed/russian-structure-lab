@@ -27,11 +27,14 @@ for(const page of pages){
 }
 const guide=fs.readFileSync(path.join(root,'feature-map.html'),'utf8');
 const destinations=[...guide.matchAll(/class="tile"[^>]*href="([^"]+\.html)"/g)].map(x=>x[1]);
-check(destinations.length===12,'Feature guide must list 12 destinations');
+const expected=pages.filter(page=>page!=='feature-map.html');
+check(destinations.length>0,'Feature guide must list destinations');
+for(const page of expected)check(destinations.includes(page),'Feature guide missing page: '+page);
+for(const dest of destinations)check(fs.existsSync(path.join(root,dest)),'Feature guide has broken destination: '+dest);
 check(new Set(destinations).size===destinations.length,'Feature guide has duplicate destinations');
 if(errors.length){
  for(const error of errors)process.stderr.write('FAIL '+error+'\n');
  process.exitCode=1;
 }else{
- process.stdout.write('PASS: 13 shared-style pages, function-guide links, local destinations and 12 discoverable features.\n');
+ process.stdout.write('PASS: '+pages.length+' shared-style pages, function-guide links and '+destinations.length+' discoverable features.\n');
 }
