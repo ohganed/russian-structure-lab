@@ -1,0 +1,19 @@
+name: AI API pilot contract tests
+on:
+  pull_request:
+    paths:
+      - 'experimental/ai-api/**'
+      - '.github/workflows/ai-api-pilot.yml'
+  workflow_dispatch:
+jobs:
+  contract-tests:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Validate API contract and HTTP behavior
+        run: python -m unittest discover -s experimental/ai-api/tests -v
