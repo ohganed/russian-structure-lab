@@ -92,9 +92,6 @@ def validate_material(material, original):
             covered.append((start, end))
         # Prevent missing entire words while tolerating punctuation between tokens.
         units = text.encode("utf-16-le")
-        for i in range(0, len(units), 2):
-            # Uncovered UTF-16 units are checked only at complete code points below.
-            pass
         uncovered = []
         prev = 0
         for start, end in covered:
