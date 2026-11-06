@@ -18,6 +18,8 @@ from urllib.request import Request, urlopen
 from alignment import align_generated_offsets
 from contract import ContractError, validate_material
 
+PROMPT_VERSION = "v1.1-russian-linguistics"
+
 SYSTEM_PROMPT = """Russian Structure Lab — expert Russian morphology lesson (Ollama pilot v1.1).
 You are an expert in Russian linguistics, morphology, syntax, stress and aspect.
 Make an accurate, educational bilingual (Japanese+English) lesson from the
@@ -51,12 +53,12 @@ conjugation and, only if reliable, aspectPair.
 Do not mistake a finite conjugated form for an infinitive.
 
 REFERENCE EXAMPLE FOR MORPHOLOGY ONLY (never substitute for user input):
-"Я читаю книгу."
-Я: lemma "я", personal pronoun, nominative, 1st person singular.
-читаю: lemma "читать", verb, imperfective, present, 1st person singular.
-книгу: lemma "книга", noun, feminine, singular, accusative, ending "у";
-it is the direct object of читать; nominative книга → accusative книгу.
-Example stress: "Я чита́ю кни́гу."
+"Мы покупаем газету."
+Мы: lemma "мы", personal pronoun, nominative, 1st person plural.
+покупаем: lemma "покупать", verb, imperfective, present, 1st person plural.
+газету: lemma "газета", noun, feminine, singular, accusative, ending "у";
+it is the direct object of покупать; nominative газета → accusative газету.
+Example stress: "Мы покупа́ем газе́ту."
 Do not output the example unless it is the supplied original text.
 
 For uncertain stress or linguistic interpretation, omit uncertain fields
@@ -210,7 +212,8 @@ def handler_factory(provider, token, allowed_origin=None):
                 return self.send_pilot_html()
             if pathname == "/health":
                 self.send_json(200, {"status": "ok", "mode": "local-only",
-                                     "schemaVersion": "1.0", "model": getattr(provider, "model", None)})
+                                     "schemaVersion": "1.0", "model": getattr(provider, "model", None),
+                                     "promptVersion": PROMPT_VERSION})
             else:
                 self.send_json(404, {"error": "Not found"})
 
@@ -270,6 +273,12 @@ def handler_factory(provider, token, allowed_origin=None):
                 return self.send_json(502, {"error": "AI provider unavailable",
                                             "code": "unexpected",
                                             "detail": "解析サービスで予期しない問題が発生しました。まず短文で試してください。"})
+            # Trustworthy provenance is server-owned, not accepted from the model.
+            validated["analysisMeta"] = {
+                "provider": "ollama",
+                "model": getattr(provider, "model", None),
+                "promptVersion": PROMPT_VERSION,
+            }
             return self.send_json(200, validated)
 
     return Handler
