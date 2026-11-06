@@ -51,6 +51,77 @@ class AlignmentTests(unittest.TestCase):
         # The original AI response is not modified.
         self.assertEqual(generated["sentences"][0]["words"][1]["start"], 17)
 
+    def test_repairs_unknown_structure_refs_from_exact_text(self):
+        generated = lesson()
+        root = generated["sentences"][0]["structure"]["tree"]
+        root["text"] = SOURCE
+        root["refIds"] = ["word_1", "word_2", "word_3"]
+        root["children"] = [
+            {"id": "n2", "text": "читаю", "refIds": ["bad-ref"], "children": []},
+            {"id": "n3", "text": "книгу", "refIds": ["different-ref"], "children": []},
+        ]
+        fixed = align_generated_offsets(generated, SOURCE)
+        tree = fixed["sentences"][0]["structure"]["tree"]
+        self.assertEqual(tree["refIds"], ["w1", "w2", "w3"])
+        self.assertEqual(tree["children"][0]["refIds"], ["w2"])
+        self.assertEqual(tree["children"][1]["refIds"], ["w3"])
+        self.assertTrue(validate_material(fixed, SOURCE))
+        self.assertEqual(generated["sentences"][0]["structure"]["tree"]["refIds"],
+                         ["word_1", "word_2", "word_3"])
+
+    def test_existing_good_refs_unchanged(self):
+        generated = lesson()
+        root = generated["sentences"][0]["structure"]["tree"]
+        root["text"] = "not source text"
+        fixed = align_generated_offsets(generated, SOURCE)
+        self.assertEqual(fixed["sentences"][0]["structure"]["tree"]["refIds"],
+                         ["w1", "w2", "w3"])
+
+    def test_structure_missing_literal_text_rejected(self):
+        generated = lesson()
+        generated["sentences"][0]["structure"]["tree"]["refIds"] = ["unknown"]
+        with self.assertRaisesRegex(ContractError, "literal"):
+            align_generated_offsets(generated, SOURCE)
+
+    def test_structure_nonmatching_node_text_rejected(self):
+        generated = lesson()
+        root = generated["sentences"][0]["structure"]["tree"]
+        root["refIds"] = ["unknown"]
+        root["text"] = "читала"
+        with self.assertRaisesRegex(ContractError, "ambiguous"):
+            align_generated_offsets(generated, SOURCE)
+
+    def test_structure_repeated_word_ambiguous_rejected(self):
+        text = "Я и Я."
+        generated = lesson(text)
+        sent = generated["sentences"][0]
+        sent["words"] = [
+            {"id": "w1", "surface": "Я"},
+            {"id": "w2", "surface": "и"},
+            {"id": "w3", "surface": "Я"},
+        ]
+        sent["chunks"] = [{"id": "c1", "text": text, "wordIds": ["w1", "w2", "w3"]}]
+        sent["structure"]["tree"] = {"id": "n1", "text": "Я",
+                                         "refIds": ["nonexistent"], "children": []}
+        with self.assertRaisesRegex(ContractError, "ambiguous"):
+            align_generated_offsets(generated, text)
+
+    def test_structure_repeated_word_existing_anchor(self):
+        text = "Я и Я."
+        generated = lesson(text)
+        sent = generated["sentences"][0]
+        sent["words"] = [
+            {"id": "w1", "surface": "Я"},
+            {"id": "w2", "surface": "и"},
+            {"id": "w3", "surface": "Я"},
+        ]
+        sent["chunks"] = [{"id": "c1", "text": text, "wordIds": ["w1", "w2", "w3"]}]
+        sent["structure"]["tree"] = {"id": "n1", "text": "Я",
+                                         "refIds": ["w3", "nonexistent"], "children": []}
+        fixed = align_generated_offsets(generated, text)
+        self.assertEqual(fixed["sentences"][0]["structure"]["tree"]["refIds"], ["w3"])
+        validate_material(fixed, text)
+
     def test_repeated_word_uses_id_anchor(self):
         text = "Я и я."
         generated = lesson(text)
