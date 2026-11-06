@@ -100,7 +100,7 @@ def handler_factory(provider, token, allowed_origin=None):
             # Generated session bearer token is restricted to this local origin.
             # No secret is committed to static GitHub Pages or placed in URLs.
             nonce = secrets.token_urlsafe(18)
-            template = Path(__file__).with_name("mac-pilot.html").read_text(encoding="utf-8")
+            template = Path(__file__).with_name("mac-pilot.template").read_text(encoding="utf-8")
             page = template.replace("__RSL_TOKEN_JSON__", json.dumps(token))
             page = page.replace("__RSL_NONCE__", nonce).encode("utf-8")
             self.send_response(200)
