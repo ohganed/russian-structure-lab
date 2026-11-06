@@ -161,6 +161,22 @@ class HttpTests(unittest.TestCase):
         self.assertEqual(status, 200)
         self.assertEqual(body["originalText"], SOURCE)
 
+    def test_model_bad_offsets_are_repaired_at_http_boundary(self):
+        lesson = copy.deepcopy(LESSON)
+        lesson["sentences"][0]["words"][1]["start"] = 99
+        lesson["sentences"][0]["words"][1]["end"] = 100
+        lesson["sentences"][0]["chunks"][0]["start"] = 10
+        lesson["sentences"][0]["chunks"][0]["end"] = 11
+        self.provider.response = lesson
+        try:
+            status, body = self.request()
+            self.assertEqual(status, 200)
+            self.assertEqual(body["sentences"][0]["words"][1]["start"], 2)
+            self.assertEqual(body["sentences"][0]["words"][1]["end"], 7)
+            self.assertEqual(body["sentences"][0]["chunks"][0]["start"], 0)
+        finally:
+            self.provider.response = LESSON
+
     def test_reject_unauthorized(self):
         self.assertEqual(self.request(token="wrong")[0], 401)
 
