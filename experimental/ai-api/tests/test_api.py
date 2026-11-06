@@ -221,6 +221,18 @@ class HttpTests(unittest.TestCase):
         self.assertNotIn("__RSL_NONCE__", html)
         self.assertNotIn("__RSL_TOKEN_JSON__", html)
 
+    def test_pilot_ignores_harmless_tracking_query_parameter(self):
+        url = self.url.replace("/v1/analyze", "/pilot?utm_source=chatgpt.com")
+        with urlopen(url, timeout=3) as response:
+            html = response.read().decode("utf-8")
+            self.assertEqual(response.status, 200)
+        self.assertIn("Mac Ollama Studio", html)
+
+    def test_health_ignores_harmless_query_parameter(self):
+        url = self.url.replace("/v1/analyze", "/health?utm_source=chatgpt.com")
+        with urlopen(url, timeout=3) as response:
+            self.assertEqual(response.status, 200)
+
     def test_foreign_site_cannot_read_pilot(self):
         req = Request(self.url.replace("/v1/analyze", "/pilot"),
                       headers={"Origin": "https://attacker.example"})
