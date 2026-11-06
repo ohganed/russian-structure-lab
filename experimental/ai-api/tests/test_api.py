@@ -112,10 +112,12 @@ class HttpTests(unittest.TestCase):
         cls.httpd.server_close()
         cls.thread.join()
 
-    def request(self, token="test-very-long-secret", origin=None):
+    def request(self, token="test-very-long-secret", origin=None, host_override=None):
         headers = {"Content-Type": "application/json", "Authorization": f"Bearer {token}"}
         if origin is not None:
             headers["Origin"] = origin
+        if host_override is not None:
+            headers["Host"] = host_override
         req = Request(self.url, data=json.dumps({"originalText": SOURCE}).encode(),
                       headers=headers, method="POST")
         try:
@@ -134,6 +136,38 @@ class HttpTests(unittest.TestCase):
 
     def test_reject_browser_origin(self):
         self.assertEqual(self.request(origin="https://ohganed.github.io")[0], 403)
+
+    def test_same_origin_browser_post(self):
+        origin = self.url.rsplit("/", 2)[0]
+        self.assertEqual(self.request(origin=origin)[0], 200)
+
+    def test_reject_rebinding_host(self):
+        self.assertEqual(self.request(host_override="not-localhost.example")[0], 403)
+
+    def test_pilot_served_locally_with_nonce_and_private_token(self):
+        url = self.url.replace("/v1/analyze", "/pilot")
+        with urlopen(url, timeout=3) as response:
+            html = response.read().decode("utf-8")
+            csp = response.headers.get("Content-Security-Policy", "")
+            self.assertEqual(response.status, 200)
+            self.assertEqual(response.headers["Cache-Control"], "no-store")
+        self.assertIn("const token=\\\"test-very-long-secret\\\";", html)
+        self.assertIn("script-src 'nonce-", csp)
+        self.assertIn("frame-ancestors 'none'", csp)
+        self.assertNotIn("__RSL_NONCE__", html)
+        self.assertNotIn("__RSL_TOKEN_JSON__", html)
+
+    def test_foreign_site_cannot_read_pilot(self):
+        req = Request(self.url.replace("/v1/analyze", "/pilot"),
+                      headers={"Origin": "https://attacker.example"})
+        with self.assertRaises(HTTPError) as caught:
+            urlopen(req, timeout=3)
+        self.assertEqual(caught.exception.code, 403)
+
+    def test_health_does_not_expose_token(self):
+        with urlopen(self.url.replace("/v1/analyze", "/health"), timeout=3) as response:
+            raw = response.read().decode("utf-8")
+        self.assertNotIn("test-very-long-secret", raw)
 
     def test_reject_invalid_generated_output(self):
         self.provider.response = {**LESSON, "originalText": "Changed"}
