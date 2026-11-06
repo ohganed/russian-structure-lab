@@ -227,3 +227,33 @@ To test the new prompt, stop only that Mac pilot and run:
 Compare identical input and model before/after the update. Passing JSON
 validation **does not** prove grammatical accuracy; review specific gold
 analyses of lemma, case, aspect, accent and explanations.
+
+
+## A/B comparison: 7B with old vs new prompt
+
+Pilot UI now shows model and prompt version from the local server's /health endpoint.
+Each validated JSON response has server-owned \`analysisMeta\`:
+\`{"provider":"ollama","model":"qwen2.5:7b","promptVersion":"v1.1-russian-linguistics"}\`.
+This metadata is not supplied by the model, and is independent of
+\`schemaVersion: "1.0"\` which remains the format version.
+
+To compare fairly:
+1. Save the currently-running 7B **old-prompt** result first, if available.
+   A Python server already running does not pick up GitHub changes.
+2. Open a new Terminal and run:
+
+       cd ~/Downloads/russian-structure-lab-ollama-pilot
+       git pull --ff-only origin experiment/ai-api-v0
+       RSL_OLLAMA_MODEL=qwen2.5:7b RSL_PORT=8769 python3 experimental/ai-api/start_mac.py
+
+3. Use http://127.0.0.1:8769/pilot, verify the pill says
+   \`qwen2.5:7b / v1.1-russian-linguistics\`, and analyze identical source.
+4. Compare lemma, Russian six-case analysis, verb aspect/tense/person,
+   stress and translations; also record rejected output and run duration.
+   The new prompt uses a **different** example ("Мы покупаем газету.")
+   from the short baseline ("Я читаю книгу.") to avoid answer leakage.
+
+Keep the old 8768 server if it remains running; do not interrupt port 4180
+AI Radio. Different localhost ports select independent pilot interfaces,
+but all models call the same local Ollama installation. JSON source validation
+is necessary but never proof of linguistic correctness.
