@@ -12,7 +12,7 @@ from urllib.request import Request, urlopen
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 from contract import ContractError, validate_material  # noqa: E402
-from server import handler_factory, ProviderError, OllamaProvider, SYSTEM_PROMPT  # noqa: E402
+from server import handler_factory, ProviderError, OllamaProvider, SYSTEM_PROMPT, PROMPT_VERSION  # noqa: E402
 
 SOURCE = "Я читаю."
 LESSON = {
@@ -91,7 +91,8 @@ class ContractTests(unittest.TestCase):
 
 class RussianPromptTests(unittest.TestCase):
     def test_expert_prompt_preserves_russian_morphology(self):
-        self.assertIn('lemma "читать"', SYSTEM_PROMPT)
+        self.assertIn('lemma "покупать"', SYSTEM_PROMPT)
+        self.assertNotIn('"Я читаю книгу."', SYSTEM_PROMPT)
         self.assertIn('accusative', SYSTEM_PROMPT)
         self.assertIn('imperfective', SYSTEM_PROMPT)
         self.assertIn('INFINITIVE', SYSTEM_PROMPT)
@@ -175,6 +176,8 @@ class HttpTests(unittest.TestCase):
         status, body = self.request()
         self.assertEqual(status, 200)
         self.assertEqual(body["originalText"], SOURCE)
+        self.assertEqual(body["analysisMeta"]["provider"], "ollama")
+        self.assertEqual(body["analysisMeta"]["promptVersion"], PROMPT_VERSION)
 
     def test_model_bad_offsets_are_repaired_at_http_boundary(self):
         lesson = copy.deepcopy(LESSON)
@@ -242,6 +245,14 @@ class HttpTests(unittest.TestCase):
             html = response.read().decode("utf-8")
             self.assertEqual(response.status, 200)
         self.assertIn("Mac Ollama Studio", html)
+        self.assertIn("d.promptVersion", html)
+
+    def test_health_announces_model_and_prompt_version(self):
+        url = self.url.replace("/v1/analyze", "/health")
+        with urlopen(url, timeout=3) as response:
+            data = json.load(response)
+        self.assertEqual(data["promptVersion"], PROMPT_VERSION)
+        self.assertEqual(data["schemaVersion"], "1.0")
 
     def test_health_ignores_harmless_query_parameter(self):
         url = self.url.replace("/v1/analyze", "/health?utm_source=chatgpt.com")
