@@ -15,6 +15,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlsplit
 from urllib.request import Request, urlopen
 
+from alignment import align_generated_offsets
 from contract import ContractError, validate_material
 
 SYSTEM_PROMPT = """You create Russian Structure Lab AI Material, schema 1.0.
@@ -205,7 +206,8 @@ def handler_factory(provider, token, allowed_origin=None):
             started = time.monotonic()
             try:
                 generated = provider.generate(original)
-                validated = validate_material(generated, original)
+                aligned = align_generated_offsets(generated, original)
+                validated = validate_material(aligned, original)
             except ProviderError as exc:
                 elapsed = round(time.monotonic() - started, 1)
                 print(f"[rsl-provider] {exc.code}; elapsed={elapsed}s; input_chars={len(original)}", flush=True)
