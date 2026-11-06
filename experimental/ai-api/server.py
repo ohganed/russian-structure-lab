@@ -157,12 +157,13 @@ def handler_factory(provider, token, allowed_origin=None):
         def do_GET(self):
             if not self.valid_host():
                 return self.send_json(403, {"error": "Invalid host"})
-            if self.path in ("/pilot", "/"):
+            pathname = urlsplit(self.path).path
+            if pathname in ("/pilot", "/"):
                 own = f"http://127.0.0.1:{self.server.server_address[1]}"
                 if self.headers.get("Origin") not in (None, own):
                     return self.send_json(403, {"error": "Invalid origin"})
                 return self.send_pilot_html()
-            if self.path == "/health":
+            if pathname == "/health":
                 self.send_json(200, {"status": "ok", "mode": "local-only",
                                      "schemaVersion": "1.0", "model": getattr(provider, "model", None)})
             else:
