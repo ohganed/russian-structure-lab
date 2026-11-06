@@ -6,12 +6,13 @@ import sys
 import threading
 import unittest
 from http.server import ThreadingHTTPServer
-from urllib.error import HTTPError
+from urllib.error import HTTPError, URLError
+from unittest.mock import patch
 from urllib.request import Request, urlopen
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 from contract import ContractError, validate_material  # noqa: E402
-from server import handler_factory  # noqa: E402
+from server import handler_factory, ProviderError, OllamaProvider  # noqa: E402
 
 SOURCE = "Я читаю."
 LESSON = {
@@ -88,11 +89,40 @@ class ContractTests(unittest.TestCase):
         self.assertEqual(remove_stress("ёлка́"), "ёлка")
 
 
+class ProviderDiagnosticTests(unittest.TestCase):
+    def setUp(self):
+        self.provider = OllamaProvider(model="qwen2.5:3b")
+
+    def test_timeout_has_explanation(self):
+        with patch("server.urlopen", side_effect=TimeoutError("slow response")):
+            with self.assertRaises(ProviderError) as caught:
+                self.provider.generate("Я читаю.")
+        self.assertEqual(caught.exception.code, "timeout")
+        self.assertIn("秒", str(caught.exception))
+
+    def test_provider_http_error_has_status_but_not_response_body(self):
+        error = HTTPError("http://127.0.0.1:11434/api/chat", 503, "secret private text", {}, None)
+        with patch("server.urlopen", side_effect=error):
+            with self.assertRaises(ProviderError) as caught:
+                self.provider.generate("Я читаю.")
+        self.assertEqual(caught.exception.code, "ollama_http")
+        self.assertIn("503", str(caught.exception))
+        self.assertNotIn("private text", str(caught.exception))
+
+    def test_provider_connection_error(self):
+        with patch("server.urlopen", side_effect=URLError("connection refused")):
+            with self.assertRaises(ProviderError) as caught:
+                self.provider.generate("Я читаю.")
+        self.assertEqual(caught.exception.code, "connection")
+
+
 class StubProvider:
     def __init__(self, response):
         self.response = response
 
     def generate(self, original):
+        if isinstance(self.response, Exception):
+            raise self.response
         return copy.deepcopy(self.response)
 
 
@@ -168,6 +198,16 @@ class HttpTests(unittest.TestCase):
         with urlopen(self.url.replace("/v1/analyze", "/health"), timeout=3) as response:
             raw = response.read().decode("utf-8")
         self.assertNotIn("test-very-long-secret", raw)
+
+    def test_provider_failure_gives_actionable_detail(self):
+        self.provider.response = ProviderError("timeout", "Ollamaの応答が遅すぎます。1文で試してください。")
+        try:
+            status, body = self.request()
+            self.assertEqual(status, 502)
+            self.assertEqual(body["code"], "timeout")
+            self.assertIn("1文", body["detail"])
+        finally:
+            self.provider.response = LESSON
 
     def test_reject_invalid_generated_output(self):
         self.provider.response = {**LESSON, "originalText": "Changed"}
