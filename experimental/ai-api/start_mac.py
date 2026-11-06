@@ -13,7 +13,7 @@ from http.server import ThreadingHTTPServer
 from urllib.error import URLError
 from urllib.request import urlopen
 
-from server import OllamaProvider, handler_factory
+from server import OllamaProvider, handler_factory, PROMPT_VERSION
 
 
 def require_ollama(provider):
@@ -52,6 +52,7 @@ def main():
             url = f"http://127.0.0.1:{port}/pilot"
             print("\nRussian Structure Lab · Mac Ollama Studio")
             print(f"モデル: {provider.model}")
+            print(f"解析プロンプト: {PROMPT_VERSION}")
             print("解析はこのMac内で行います。AI Materialへの取り込みはJSONコピー方式です。")
             print(f"ローカル画面: {url}")
             print("終了: Control+C\n", flush=True)
