@@ -12,7 +12,7 @@ from urllib.request import Request, urlopen
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 from contract import ContractError, validate_material  # noqa: E402
-from server import handler_factory, ProviderError, OllamaProvider  # noqa: E402
+from server import handler_factory, ProviderError, OllamaProvider, SYSTEM_PROMPT  # noqa: E402
 
 SOURCE = "Я читаю."
 LESSON = {
@@ -87,6 +87,21 @@ class ContractTests(unittest.TestCase):
     def test_keep_yo_when_adding_accent(self):
         from contract import remove_stress
         self.assertEqual(remove_stress("ёлка́"), "ёлка")
+
+
+class RussianPromptTests(unittest.TestCase):
+    def test_expert_prompt_preserves_russian_morphology(self):
+        self.assertIn('lemma "читать"', SYSTEM_PROMPT)
+        self.assertIn('accusative', SYSTEM_PROMPT)
+        self.assertIn('imperfective', SYSTEM_PROMPT)
+        self.assertIn('INFINITIVE', SYSTEM_PROMPT)
+        self.assertIn('EXACT original substring', SYSTEM_PROMPT)
+        self.assertIn('Do NOT generate word/chunk start/end offsets', SYSTEM_PROMPT)
+
+    def test_prompt_warns_against_japanese_morphology_leakage(self):
+        self.assertIn('NOT Japanese morphological analyzer labels', SYSTEM_PROMPT)
+        self.assertIn('never invent identifiers', SYSTEM_PROMPT)
+        self.assertIn('confidence.overall=1', SYSTEM_PROMPT)
 
 
 class ProviderDiagnosticTests(unittest.TestCase):
