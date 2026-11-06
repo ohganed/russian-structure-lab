@@ -177,6 +177,24 @@ class HttpTests(unittest.TestCase):
         finally:
             self.provider.response = LESSON
 
+    def test_api_repairs_structure_ref_mismatch(self):
+        generated = copy.deepcopy(LESSON)
+        tree = generated["sentences"][0]["structure"]["tree"]
+        tree["text"] = SOURCE
+        tree["refIds"] = ["AI_WORD_1", "AI_WORD_2"]
+        tree["children"] = [
+            {"id": "n2", "text": "читаю", "refIds": ["invented_word_id"], "children": []}
+        ]
+        self.provider.response = generated
+        try:
+            status, body = self.request()
+            self.assertEqual(status, 200)
+            repaired = body["sentences"][0]["structure"]["tree"]
+            self.assertEqual(repaired["refIds"], ["w1", "w2"])
+            self.assertEqual(repaired["children"][0]["refIds"], ["w2"])
+        finally:
+            self.provider.response = LESSON
+
     def test_reject_unauthorized(self):
         self.assertEqual(self.request(token="wrong")[0], 401)
 
