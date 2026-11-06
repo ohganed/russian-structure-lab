@@ -122,3 +122,38 @@ Actions do not confirm that the user's Mac, Ollama model or Russian-language
 analysis passes. The schema/position checks do not judge grammar correctness.
 Do not describe the experimental PR as a production release until user-device
 and Educational Validity Gate checks pass.
+
+
+## Troubleshooting: AI provider unavailable (502)
+
+The local /pilot screen and /health returning HTTP 200 means the pilot server
+is running. A 502 from POST /v1/analyze is a model/provider stage failure,
+not proof the Mac UI is broken. The old pilot reported every failure as the
+same "AI provider unavailable" string. This branch now adds:
+- timeout → Ollama did not respond within RSL_OLLAMA_TIMEOUT (default 240s).
+- ollama_http → Ollama returned HTTP status 4xx/5xx. The exact status is shown.
+- connection → Ollama could not be reached or the connection was interrupted.
+- bad_response → Ollama returned an unexpected message format.
+- unexpected → unexpected internal/provider failure.
+
+The terminal prints only error class, elapsed time, and input length. It
+deliberately does NOT log the Russian source text or generated lesson.
+
+After pulling new commits: Stop the old server with Control+C, then run:
+
+    cd ~/Downloads/russian-structure-lab-ollama-pilot
+    git pull --ff-only origin experiment/ai-api-v0
+    python3 experimental/ai-api/start_mac.py
+
+First test the short sentence: Я читаю книгу.
+For a 10-sentence news article, try one or two sentences at a time. A small
+3B model producing high-detail structured JSON for ten sentences can be slow
+or exceed its practical generation capacity. If the model is slow even with
+short sentences, you may configure a longer maximum wait time:
+
+    RSL_OLLAMA_TIMEOUT=360 python3 experimental/ai-api/start_mac.py
+
+Allowable range is 30..600 seconds. A longer timeout does NOT guarantee
+correct grammar or syntactically valid JSON. HTTP 422 means an AI output was
+rejected by the contract validator, not that Ollama is inaccessible.
+Do not blindly save invalid JSON; the UI should continue to show an error.
