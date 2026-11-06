@@ -181,3 +181,21 @@ After this change run:
 Stop the currently running local server using Control+C first.
 Retest Я читаю книгу. If that passes, try the longer news text 1–2
 sentences at a time to assess latency and substantive analysis quality.
+
+
+## Fix: structure has unknown word ref
+
+Ollama sometimes invents references such as S1.node.refIds=["word1"]
+while the actual sentence.words[].id values are ["w1","w2",...].
+The Mac pilot now safely reconstructs unknown structure refIds from
+node.text only when that literal substring identifies the intended
+source words unambiguously. Existing correct references are preserved;
+ambiguous repeated text, modified wording, missing node text and
+unresolvable references are still rejected.
+
+The system prompt also requires the model to cite existing exact word
+IDs in every structure tree node. This is a structural repair only,
+not evidence that a grammar analysis is linguistically correct.
+
+The AI Radio application, if running on port 4180, is a separate process;
+updating or restarting this pilot on port 8766 must not affect it.
