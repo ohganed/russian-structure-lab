@@ -62,6 +62,55 @@ def _find_chunk(text, value, word_spans, word_ids):
     return candidates[0]
 
 
+
+def _repair_structure_refs(node, text, word_spans):
+    """Repair unknown word references only when node.text identifies words exactly.
+
+    Do not reinterpret grammar or guess referents. A repeated or nonliteral
+    phrase without a unique anchor remains a hard error.
+    """
+    if not isinstance(node, dict):
+        raise ContractError("Structure tree node must be an object")
+    refs = node.get("refIds", [])
+    if not isinstance(refs, list) or any(not isinstance(ref, str) for ref in refs):
+        raise ContractError("Structure refIds must be an array of word IDs")
+
+    missing = any(ref not in word_spans for ref in refs)
+    if missing:
+        value = node.get("text")
+        if not isinstance(value, str) or not value:
+            raise ContractError("Structure has unknown word ref and no literal node text")
+
+        candidates = []
+        at = text.find(value)
+        while at >= 0:
+            end = at + len(value)
+            if _whole_token(text, at, end):
+                matched = [wid for wid, (a, b) in word_spans.items()
+                           if at <= a and b <= end]
+                partial = any(
+                    (a < end and b > at) and not (at <= a and b <= end)
+                    for a, b in word_spans.values()
+                )
+                # Keep every existing valid reference anchored in the candidate.
+                known = [ref for ref in refs if ref in word_spans]
+                if matched and not partial and all(ref in matched for ref in known):
+                    candidates.append(matched)
+            at = text.find(value, at + 1)
+
+        if len(candidates) != 1:
+            raise ContractError(
+                "Structure has unknown word ref; node text is missing or ambiguous"
+            )
+        node["refIds"] = candidates[0]
+
+    children = node.get("children", [])
+    if not isinstance(children, list):
+        raise ContractError("Structure children must be an array")
+    for child in children:
+        _repair_structure_refs(child, text, word_spans)
+
+
 def align_generated_offsets(material, original):
     """Return a copy with deterministic offsets; never change original text.
 
@@ -99,5 +148,9 @@ def align_generated_offsets(material, original):
             start, end = _find_chunk(text, chunk["text"], spans, ids)
             chunk["start"] = _utf16_index(text, start)
             chunk["end"] = _utf16_index(text, end)
+
+        tree = (sentence.get("structure") or {}).get("tree")
+        if tree is not None:
+            _repair_structure_refs(tree, text, spans)
 
     return repaired
