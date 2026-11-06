@@ -199,3 +199,31 @@ not evidence that a grammar analysis is linguistically correct.
 
 The AI Radio application, if running on port 4180, is a separate process;
 updating or restarting this pilot on port 8766 must not affect it.
+
+## Russian linguistic quality: expert prompt v1.1 (7B comparison)
+
+The existing public `ai-material.html` has a detailed Japanese JSON prompt v1.0.
+The early Mac-only API used a separate, *much shorter* prompt focused on JSON
+structure, and did not carry over explicit Russian case/infinitive/aspect/ending
+instructions. This likely contributed to substantive errors such as
+`книгу` incorrectly tagged "possessive" and `читаю` with lemma `читаю`.
+
+The experimental Mac pilot now uses a **revised linguistic v1.1 prompt**
+in `server.py`, drawing on the existing v1.0 teaching requirements:
+Russian case names, real lemma, verbal aspect, person and tense,
+Russian endings, bilingual grammar reasoning, stress, and cautious
+confidence. It retains exact-source/no-invented-IDs constraints and the
+deterministic offset/structure validation already in place.
+
+**Comparison protocol:** finish any already-running 7B test with the old
+prompt first, and save that JSON as the baseline. Pushing a GitHub update
+does not change a Python server process already running on the Mac.
+To test the new prompt, stop only that Mac pilot and run:
+
+    cd ~/Downloads/russian-structure-lab-ollama-pilot
+    git pull --ff-only origin experiment/ai-api-v0
+    RSL_OLLAMA_MODEL=qwen2.5:7b RSL_PORT=8768 python3 experimental/ai-api/start_mac.py
+
+Compare identical input and model before/after the update. Passing JSON
+validation **does not** prove grammatical accuracy; review specific gold
+analyses of lemma, case, aspect, accent and explanations.
