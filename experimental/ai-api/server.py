@@ -31,6 +31,9 @@ meaning:{ja,en}, partOfSpeech:{ja,en}, confidence:{overall}, and when
 linguistically certain: case, ending, morphology, aspect, aspectPair.
 Each chunk: id, text, wordIds, meaningOrder:{ja,en},
 naturalMeaning:{ja,en}, function:{ja,en}.
+Every structure.tree node must use refIds taken EXACTLY from that sentence's
+words[].id values (case-sensitive). Its text must be an EXACT contiguous
+substring of sentence.text. Never invent word IDs or paraphrase node.text.
 Do NOT generate start/end character offsets for words or chunks.
 The server calculates all UTF-16 offsets from exact source text.
 List all words in source order with the exact unaccented surface spelling.
