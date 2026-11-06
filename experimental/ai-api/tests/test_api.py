@@ -151,7 +151,7 @@ class HttpTests(unittest.TestCase):
             csp = response.headers.get("Content-Security-Policy", "")
             self.assertEqual(response.status, 200)
             self.assertEqual(response.headers["Cache-Control"], "no-store")
-        self.assertIn("const token=\\\"test-very-long-secret\\\";", html)
+        self.assertIn('const token="test-very-long-secret";', html)
         self.assertIn("script-src 'nonce-", csp)
         self.assertIn("frame-ancestors 'none'", csp)
         self.assertNotIn("__RSL_NONCE__", html)
