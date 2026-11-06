@@ -157,3 +157,27 @@ Allowable range is 30..600 seconds. A longer timeout does NOT guarantee
 correct grammar or syntactically valid JSON. HTTP 422 means an AI output was
 rejected by the contract validator, not that Ollama is inaccessible.
 Do not blindly save invalid JSON; the UI should continue to show an error.
+
+
+## Fix: surface offset mismatch (example: читаю)
+
+For a source such as Я читаю книгу., the correct JS slice offsets are:
+Я [0,1), читаю [2,7), книгу [8,13). A small LLM may return wrong
+start/end positions even when it analyzes the text correctly.
+
+The API now asks Ollama **not** to count positions. alignment.py derives
+word and chunk offsets deterministically from the **exact** sentence.text
+using UTF-16 indexing, and then runs the original strict validator.
+Exact original text, source order, accents, word spelling and cross-references
+are never silently changed. Unknown, missing or ambiguous text is still
+rejected rather than fabricated; grammar accuracy remains a separate review.
+
+After this change run:
+
+    cd ~/Downloads/russian-structure-lab-ollama-pilot
+    git pull --ff-only origin experiment/ai-api-v0
+    python3 experimental/ai-api/start_mac.py
+
+Stop the currently running local server using Control+C first.
+Retest Я читаю книгу. If that passes, try the longer news text 1–2
+sentences at a time to assess latency and substantive analysis quality.
