@@ -7,6 +7,8 @@ curriculum files are changed by this prototype.
 import hmac
 import json
 import os
+import secrets
+from pathlib import Path
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlsplit
 from urllib.request import Request, urlopen
@@ -75,6 +77,8 @@ def handler_factory(provider, token, allowed_origin=None):
             self.send_header("Content-Length", str(len(data)))
             self.send_header("Cache-Control", "no-store")
             self.send_header("X-Content-Type-Options", "nosniff")
+            self.send_header("X-Frame-Options", "DENY")
+            self.send_header("Referrer-Policy", "no-referrer")
             origin = self.headers.get("Origin")
             if allowed_origin and origin == allowed_origin:
                 self.send_header("Access-Control-Allow-Origin", allowed_origin)
@@ -82,9 +86,36 @@ def handler_factory(provider, token, allowed_origin=None):
             self.end_headers()
             self.wfile.write(data)
 
+        def valid_host(self):
+            # Host allowlist prevents DNS rebinding from a foreign webpage.
+            expected = f"127.0.0.1:{self.server.server_address[1]}"
+            return self.headers.get("Host", "") == expected
+
         def origin_permitted(self):
             origin = self.headers.get("Origin")
-            return not origin or (allowed_origin is not None and origin == allowed_origin)
+            own = f"http://127.0.0.1:{self.server.server_address[1]}"
+            return not origin or origin == own or (allowed_origin is not None and origin == allowed_origin)
+
+        def send_pilot_html(self):
+            # Generated session bearer token is restricted to this local origin.
+            # No secret is committed to static GitHub Pages or placed in URLs.
+            nonce = secrets.token_urlsafe(18)
+            template = Path(__file__).with_name("mac-pilot.html").read_text(encoding="utf-8")
+            page = template.replace("__RSL_TOKEN_JSON__", json.dumps(token))
+            page = page.replace("__RSL_NONCE__", nonce).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Length", str(len(page)))
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("Referrer-Policy", "no-referrer")
+            self.send_header("X-Content-Type-Options", "nosniff")
+            self.send_header("X-Frame-Options", "DENY")
+            self.send_header("Content-Security-Policy",
+                "default-src 'none'; script-src 'nonce-" + nonce + "'; "
+                "style-src 'unsafe-inline'; connect-src 'self'; "
+                "base-uri 'none'; form-action 'none'; frame-ancestors 'none'; object-src 'none'")
+            self.end_headers()
+            self.wfile.write(page)
 
         def authorized(self):
             expected = "Bearer " + token
@@ -92,12 +123,22 @@ def handler_factory(provider, token, allowed_origin=None):
             return hmac.compare_digest(provided, expected)
 
         def do_GET(self):
+            if not self.valid_host():
+                return self.send_json(403, {"error": "Invalid host"})
+            if self.path in ("/pilot", "/"):
+                own = f"http://127.0.0.1:{self.server.server_address[1]}"
+                if self.headers.get("Origin") not in (None, own):
+                    return self.send_json(403, {"error": "Invalid origin"})
+                return self.send_pilot_html()
             if self.path == "/health":
-                self.send_json(200, {"status": "ok", "mode": "local-only", "schemaVersion": "1.0"})
+                self.send_json(200, {"status": "ok", "mode": "local-only",
+                                     "schemaVersion": "1.0", "model": getattr(provider, "model", None)})
             else:
                 self.send_json(404, {"error": "Not found"})
 
         def do_OPTIONS(self):
+            if not self.valid_host():
+                return self.send_json(403, {"error": "Invalid host"})
             # CORS is disabled by default. Never allow arbitrary web origins.
             if not self.origin_permitted() or not allowed_origin:
                 return self.send_json(403, {"error": "Origin not allowed"})
@@ -110,6 +151,8 @@ def handler_factory(provider, token, allowed_origin=None):
             self.end_headers()
 
         def do_POST(self):
+            if not self.valid_host():
+                return self.send_json(403, {"error": "Invalid host"})
             if self.path != "/v1/analyze":
                 return self.send_json(404, {"error": "Not found"})
             if not self.origin_permitted():
