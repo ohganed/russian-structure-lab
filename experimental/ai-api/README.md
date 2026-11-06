@@ -80,3 +80,45 @@ validation alone does **not** establish Russian linguistic accuracy.
   ё/combining accents, iPhone access architecture, accessibility, credentials,
   and the existing EVIDENCE_GATE.md curriculum requirements.
 - Do not change PROJECT_CARD.md or declare an EVG PASS from this experiment.
+
+
+## Mac-only UI pilot (new, separate from public Pages)
+
+**Mac and Ollama only.** The experimental PR holds a Mac-local analysis
+screen; the main branch and its GitHub Pages UI remain untouched.
+
+Start from the repository root after switching to the experiment branch:
+
+    python3 experimental/ai-api/start_mac.py
+
+Requirements: macOS, Python 3.10+, Ollama running on this Mac, with
+the requested model installed. Default model is qwen2.5:3b.
+Use RSL_OLLAMA_MODEL if you have installed another model, e.g.:
+
+    RSL_OLLAMA_MODEL=gemma3:4b python3 experimental/ai-api/start_mac.py
+
+The launcher:
+1. Checks the local Ollama service and installed model.
+2. Creates a random **in-memory-only, per-run** bearer token.
+3. Serves the screen at http://127.0.0.1:8766/pilot and opens it on Mac.
+4. Accepts JSON analysis requests only on loopback with a valid token.
+5. Stops with Control+C in Terminal. No Mac/iPhone cross-device access.
+
+On screen: enter text → MacのOllamaで解析 → review preview →
+JSONをコピー → open existing AI Material and paste into Generated JSON.
+Nothing is automatically imported into the existing learner database.
+ChatGPT remains available via the existing manual AI Material prompt flow.
+
+**Security details:** The HTML is stored in a .template resource, not a
+direct GitHub Pages .html entry point. The local server injects the ephemeral
+bearer token into the page served **only** from 127.0.0.1, not into URLs, git,
+localStorage or the clipboard. It enforces Host and Origin restrictions, CSP,
+no-store, no-referrer and fail-closed JSON validation. A static browser page
+(including the public GitHub Pages deployment) cannot call the API using a
+hard-coded credential. Never port-forward or expose port 8766 on a network.
+
+**Verification boundary:** HTTP security and contract unit tests in GitHub
+Actions do not confirm that the user's Mac, Ollama model or Russian-language
+analysis passes. The schema/position checks do not judge grammar correctness.
+Do not describe the experimental PR as a production release until user-device
+and Educational Validity Gate checks pass.
