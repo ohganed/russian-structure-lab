@@ -8,6 +8,8 @@ import hmac
 import json
 import os
 import secrets
+import time
+from urllib.error import HTTPError, URLError
 from pathlib import Path
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlsplit
@@ -37,6 +39,13 @@ Emit complete text, no omitted sentences. Avoid speculative etymology.
 """
 
 
+class ProviderError(RuntimeError):
+    """A safe-to-display provider failure, without original text or credentials."""
+    def __init__(self, code, detail):
+        super().__init__(detail)
+        self.code = code
+
+
 class OllamaProvider:
     def __init__(self, base_url=None, model=None):
         self.url = (base_url or os.environ.get("RSL_OLLAMA_URL", "http://127.0.0.1:11434")).rstrip("/")
@@ -60,9 +69,29 @@ class OllamaProvider:
             self.url + "/api/chat", data=body,
             headers={"Content-Type": "application/json"}, method="POST"
         )
-        with urlopen(req, timeout=120) as response:
-            payload = json.load(response)
-        return json.loads(payload["message"]["content"])
+        try:
+            timeout = int(os.environ.get("RSL_OLLAMA_TIMEOUT", "240"))
+        except ValueError:
+            timeout = 240
+        timeout = max(30, min(timeout, 600))
+        try:
+            with urlopen(req, timeout=timeout) as response:
+                payload = json.load(response)
+        except HTTPError as exc:
+            # Do not echo provider error bodies: they may include user content.
+            raise ProviderError("ollama_http", f"OllamaがHTTP {exc.code}を返しました。MacのOllamaの状態・メモリを確認してください。") from exc
+        except TimeoutError as exc:
+            raise ProviderError("timeout", f"Ollamaの応答が{timeout}秒以内に完了しませんでした。まず1文で試してください。") from exc
+        except URLError as exc:
+            if isinstance(exc.reason, TimeoutError):
+                raise ProviderError("timeout", f"Ollamaの応答が{timeout}秒以内に完了しませんでした。まず1文で試してください。") from exc
+            raise ProviderError("connection", "MacのOllamaに接続できませんでした。Ollamaが起動しているか確認してください。") from exc
+        except OSError as exc:
+            raise ProviderError("connection", "Ollamaとの通信が途中で切断されました。MacのメモリとOllamaの状態を確認してください。") from exc
+        try:
+            return json.loads(payload["message"]["content"])
+        except (TypeError, KeyError, AttributeError) as exc:
+            raise ProviderError("bad_response", "Ollamaが想定外の形式で応答しました。短い文章から試してください。") from exc
 
 
 def handler_factory(provider, token, allowed_origin=None):
@@ -173,14 +202,24 @@ def handler_factory(provider, token, allowed_origin=None):
                     raise ContractError("originalText must contain 1..4000 characters")
             except (ValueError, UnicodeError, ContractError) as exc:
                 return self.send_json(422, {"error": "Invalid request", "detail": str(exc)})
+            started = time.monotonic()
             try:
                 generated = provider.generate(original)
                 validated = validate_material(generated, original)
+            except ProviderError as exc:
+                elapsed = round(time.monotonic() - started, 1)
+                print(f"[rsl-provider] {exc.code}; elapsed={elapsed}s; input_chars={len(original)}", flush=True)
+                return self.send_json(502, {"error": "AI provider unavailable",
+                                            "code": exc.code, "detail": str(exc)})
             except (ContractError, KeyError, ValueError, TypeError) as exc:
                 # Never return a malformed AI-generated lesson as a success.
                 return self.send_json(422, {"error": "AI output rejected", "detail": str(exc)})
-            except Exception:
-                return self.send_json(502, {"error": "AI provider unavailable"})
+            except Exception as exc:
+                # Log the error type only; never print submitted text or AI output.
+                print(f"[rsl-provider] unexpected={type(exc).__name__}; input_chars={len(original)}", flush=True)
+                return self.send_json(502, {"error": "AI provider unavailable",
+                                            "code": "unexpected",
+                                            "detail": "解析サービスで予期しない問題が発生しました。まず短文で試してください。"})
             return self.send_json(200, validated)
 
     return Handler
