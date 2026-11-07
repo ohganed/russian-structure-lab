@@ -257,3 +257,31 @@ Keep the old 8768 server if it remains running; do not interrupt port 4180
 AI Radio. Different localhost ports select independent pilot interfaces,
 but all models call the same local Ollama installation. JSON source validation
 is necessary but never proof of linguistic correctness.
+
+
+## Fix: Chunk refers to unknown word IDs
+
+A valid model output may use sentence.words IDs such as "w1","w2",
+but generate chunk.wordIds as "W1","W2" or other invented labels.
+Source word spelling and position already provide a deterministic mapping:
+- Match chunk.text as an **exact** contiguous substring of sentence.text.
+- If chunk.wordIds contains unknown IDs and this substring identifies one
+  unambiguous whole-word span, rebuild wordIds from the real source words.
+- Preserve correct existing IDs, and use valid ones to resolve repeated text.
+- Reject ambiguous repeated phrases, modified or partial words, and chunks
+  pointing to conflicting existing words.
+- Run the strict source/offset/ID contract validator after alignment.
+
+This is **not** linguistic validation: a structurally accepted lesson can
+still contain inaccurate Russian morphology or translations. An actual
+7B Mac analysis must be reviewed before using it for learning materials.
+
+To install the fix, restart only the local pilot on 8769, **not** Ollama
+itself or AI Radio on 4180:
+
+    cd ~/Downloads/russian-structure-lab-ollama-pilot
+    git pull --ff-only origin experiment/ai-api-v0
+    RSL_OLLAMA_MODEL=qwen2.5:7b RSL_PORT=8769 python3 experimental/ai-api/start_mac.py
+
+If 8769 is in use, stop the specific old pilot process in its original
+terminal using Control+C. Do not blindly kill other Python processes.
