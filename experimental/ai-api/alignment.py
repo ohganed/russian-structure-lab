@@ -11,6 +11,17 @@ import unicodedata
 from contract import ContractError
 
 
+def _stable_id(value, prefix, index, existing):
+    """Coerce the model's loose ID to a unique string owned by the server."""
+    proposed = str(value) if type(value) is int else value
+    if not isinstance(proposed, str) or not proposed.strip() or proposed in existing:
+        proposed = f"{prefix}{index}"
+        while proposed in existing:
+            proposed += "_"
+    existing.add(proposed)
+    return proposed
+
+
 def _utf16_index(text, index):
     return len(text[:index].encode("utf-16-le")) // 2
 
@@ -102,9 +113,14 @@ def _repair_structure_refs(node, text, word_spans):
     if not isinstance(node, dict):
         raise ContractError("Structure tree node must be an object")
     refs = node.get("refIds", [])
-    if not isinstance(refs, list) or any(not isinstance(ref, str) for ref in refs):
-        raise ContractError("Structure refIds must be an array of word IDs")
-
+    if not isinstance(refs, list):
+        refs = [refs] if refs is not None else []
+    refs = [str(ref) if type(ref) is int else ref for ref in refs]
+    if any(not isinstance(ref, str) for ref in refs):
+        # Non-string refs cannot identify source words, but literal node.text
+        # may still be enough to reconstruct a precise mapping.
+        refs = ["__invalid_ref__"]
+    node["refIds"] = refs
     missing = any(ref not in word_spans for ref in refs)
     if missing:
         value = node.get("text")
@@ -151,27 +167,32 @@ def align_generated_offsets(material, original):
         raise ContractError("originalText differs from the submitted text")
 
     repaired = deepcopy(material)
-    for sentence in repaired.get("sentences", []):
+    sentence_ids = set()
+    for si, sentence in enumerate(repaired.get("sentences", []), start=1):
         if not isinstance(sentence, dict) or not isinstance(sentence.get("text"), str):
             raise ContractError("Missing sentence text")
+        sentence["id"] = _stable_id(sentence.get("id"), "s", si, sentence_ids)
         text = sentence["text"]
         cursor = 0
         spans = {}
+        word_ids = set()
         words = sentence.get("words") or []
-        for word in words:
+        for wi, word in enumerate(words, start=1):
             if not isinstance(word, dict) or not isinstance(word.get("surface"), str) or not word["surface"]:
                 raise ContractError("Word surface is missing")
             start, end = _find_word(text, word["surface"], cursor)
             word["start"] = _utf16_index(text, start)
             word["end"] = _utf16_index(text, end)
             cursor = end
-            wid = word.get("id")
-            if isinstance(wid, str):
-                spans[wid] = (start, end)
+            wid = _stable_id(word.get("id"), "w", wi, word_ids)
+            word["id"] = wid
+            spans[wid] = (start, end)
 
-        for chunk in sentence.get("chunks") or []:
+        chunk_ids = set()
+        for ci, chunk in enumerate(sentence.get("chunks") or [], start=1):
             if not isinstance(chunk, dict) or not isinstance(chunk.get("text"), str) or not chunk["text"]:
                 raise ContractError("Chunk text is missing")
+            chunk["id"] = _stable_id(chunk.get("id"), "c", ci, chunk_ids)
             # All chunk references and positions come from literal source spans.
             # Ollama's wordIds (including missing, wrong and numeric IDs) are
             # only optional disambiguation hints for repeated identical text.
