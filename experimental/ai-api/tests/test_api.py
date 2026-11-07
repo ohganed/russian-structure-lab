@@ -195,6 +195,19 @@ class HttpTests(unittest.TestCase):
         finally:
             self.provider.response = LESSON
 
+    def test_api_repairs_chunk_unknown_word_ids(self):
+        generated = copy.deepcopy(LESSON)
+        generated["sentences"][0]["chunks"][0]["wordIds"] = ["AI_1", "AI_2"]
+        self.provider.response = generated
+        try:
+            status, body = self.request()
+            self.assertEqual(status, 200)
+            chunk = body["sentences"][0]["chunks"][0]
+            self.assertEqual(chunk["wordIds"], ["w1", "w2"])
+            self.assertEqual((chunk["start"], chunk["end"]), (0, 7))
+        finally:
+            self.provider.response = LESSON
+
     def test_api_repairs_structure_ref_mismatch(self):
         generated = copy.deepcopy(LESSON)
         tree = generated["sentences"][0]["structure"]["tree"]
