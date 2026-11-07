@@ -218,21 +218,68 @@ class AlignmentTests(unittest.TestCase):
         self.assertEqual(fixed["sentences"][0]["chunks"][0]["start"], 4)
         validate_material(fixed, text)
 
-    def test_noninteger_chunk_refs_are_rejected(self):
-        for invalid in (True, 1.5, {"id": "w2"}, ["w2"]):
+    def test_chunk_refs_are_derived_from_text_despite_model_type_errors(self):
+        for invalid in (True, 1.5, {"id": "w2"}, ["w2"], None):
             with self.subTest(invalid=invalid):
                 generated = lesson()
                 generated["sentences"][0]["chunks"][0]["wordIds"] = [invalid]
-                with self.assertRaisesRegex(ContractError, "unsupported"):
-                    align_generated_offsets(generated, SOURCE)
+                fixed = align_generated_offsets(generated, SOURCE)
+                self.assertEqual(fixed["sentences"][0]["chunks"][0]["wordIds"], ["w1", "w2"])
+                validate_material(fixed, SOURCE)
 
-    def test_scalar_chunk_word_ids_are_rejected(self):
-        for invalid in (2, "w2", None):
+    def test_scalar_chunk_word_ids_are_rebuilt_when_source_is_unambiguous(self):
+        for invalid in (2, "w2", None, {"id": "w2"}):
             with self.subTest(invalid=invalid):
                 generated = lesson()
                 generated["sentences"][0]["chunks"][0]["wordIds"] = invalid
-                with self.assertRaisesRegex(ContractError, "array"):
-                    align_generated_offsets(generated, SOURCE)
+                fixed = align_generated_offsets(generated, SOURCE)
+                self.assertEqual(fixed["sentences"][0]["chunks"][0]["wordIds"], ["w1", "w2"])
+                validate_material(fixed, SOURCE)
+
+    def test_whole_sentence_chunk_ignores_conflicting_model_references(self):
+        generated = lesson()
+        sentence = generated["sentences"][0]
+        sentence["chunks"] = [{
+            "id": "full", "text": SOURCE,
+            "wordIds": ["invented", 99, None],
+            "meaningOrder": {"ja": "私は読む本を"},
+            "naturalMeaning": {"ja": "私は本を読んでいる"},
+        }]
+        fixed = align_generated_offsets(generated, SOURCE)
+        self.assertEqual(fixed["sentences"][0]["chunks"][0]["wordIds"], ["w1", "w2", "w3"])
+        self.assertEqual((fixed["sentences"][0]["chunks"][0]["start"],
+                          fixed["sentences"][0]["chunks"][0]["end"]), (0, 14))
+        validate_material(fixed, SOURCE)
+
+    def test_unique_chunk_text_ignores_wrong_existing_id(self):
+        generated = lesson()
+        sentence = generated["sentences"][0]
+        sentence["chunks"][1]["wordIds"] = ["w1"]
+        fixed = align_generated_offsets(generated, SOURCE)
+        self.assertEqual(fixed["sentences"][0]["chunks"][1]["wordIds"], ["w3"])
+        validate_material(fixed, SOURCE)
+
+    def test_punctuation_boundaries_between_adjacent_texts(self):
+        text = "Я читаю книгу.Она читает."
+        generated = lesson(text)
+        sent = generated["sentences"][0]
+        sent["words"] = [
+            {"id": "w1", "surface": "Я"},
+            {"id": "w2", "surface": "читаю"},
+            {"id": "w3", "surface": "книгу"},
+            {"id": "w4", "surface": "Она"},
+            {"id": "w5", "surface": "читает"},
+        ]
+        sent["chunks"] = [
+            {"id": "c1", "text": "Я читаю книгу.", "wordIds": ["wrong"]},
+            {"id": "c2", "text": "Она читает.", "wordIds": []},
+        ]
+        sent["structure"]["tree"]["refIds"] = ["w1", "w2", "w3", "w4", "w5"]
+        fixed = align_generated_offsets(generated, text)
+        self.assertEqual(fixed["sentences"][0]["chunks"][0]["wordIds"], ["w1", "w2", "w3"])
+        self.assertEqual(fixed["sentences"][0]["chunks"][1]["wordIds"], ["w4", "w5"])
+        validate_material(fixed, text)
+
 
     def test_repeated_word_uses_id_anchor(self):
         text = "Я и я."
