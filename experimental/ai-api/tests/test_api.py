@@ -188,6 +188,30 @@ class HttpTests(unittest.TestCase):
         self.assertEqual(body["analysisMeta"]["provider"], "ollama")
         self.assertEqual(body["analysisMeta"]["promptVersion"], PROMPT_VERSION)
 
+    def test_linguistic_contradiction_blocks_import_even_after_valid_json(self):
+        generated = copy.deepcopy(LESSON)
+        generated["sentences"][0]["words"][1].update({
+            "lemma": "читать", "partOfSpeech": {"en": "verb"},
+            "tense": "present", "person": "3rd person singular",
+        })
+        self.provider.response = generated
+        try:
+            status, body = self.request()
+            self.assertEqual(status, 422)
+            self.assertEqual(body["error"], "Linguistic contradictions detected")
+            self.assertIn("verb_1sg_person_conflict",
+                          {i["code"] for i in body["qualityIssues"]})
+            self.assertIn("rejectedDraft", body)
+        finally:
+            self.provider.response = LESSON
+
+    def test_structurally_valid_response_always_requires_linguistic_review(self):
+        status, body = self.request()
+        self.assertEqual(status, 200)
+        self.assertEqual(body["qualityReview"]["status"], "review_required")
+        self.assertFalse(body["qualityReview"]["linguisticallyVerified"])
+        self.assertEqual(body["analysisMeta"]["linguisticStatus"], "review_required")
+
     def test_model_bad_offsets_are_repaired_at_http_boundary(self):
         lesson = copy.deepcopy(LESSON)
         lesson["sentences"][0]["words"][1]["start"] = 99
