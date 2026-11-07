@@ -33,6 +33,11 @@ def require_ollama(provider):
         )
 
 
+def pilot_url(server):
+    """Use the port actually bound by the OS (supports RSL_PORT=0)."""
+    return f"http://127.0.0.1:{server.server_address[1]}/pilot"
+
+
 def main():
     if platform.system() != "Darwin":
         raise SystemExit("この起動画面はMac専用です。通常APIのテストは別途実行できます。")
@@ -49,7 +54,7 @@ def main():
         with ThreadingHTTPServer(
             ("127.0.0.1", port), handler_factory(provider, token)
         ) as server:
-            url = f"http://127.0.0.1:{port}/pilot"
+            url = pilot_url(server)
             print("\nRussian Structure Lab · Mac Ollama Studio")
             print(f"モデル: {provider.model}")
             print(f"解析プロンプト: {PROMPT_VERSION}")
