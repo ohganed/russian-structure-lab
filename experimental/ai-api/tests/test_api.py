@@ -195,6 +195,17 @@ class HttpTests(unittest.TestCase):
         finally:
             self.provider.response = LESSON
 
+    def test_api_repairs_numeric_and_null_chunk_word_ids(self):
+        generated = copy.deepcopy(LESSON)
+        generated["sentences"][0]["chunks"][0]["wordIds"] = [1, None]
+        self.provider.response = generated
+        try:
+            status, body = self.request()
+            self.assertEqual(status, 200)
+            self.assertEqual(body["sentences"][0]["chunks"][0]["wordIds"], ["w1", "w2"])
+        finally:
+            self.provider.response = LESSON
+
     def test_api_repairs_chunk_unknown_word_ids(self):
         generated = copy.deepcopy(LESSON)
         generated["sentences"][0]["chunks"][0]["wordIds"] = ["AI_1", "AI_2"]
