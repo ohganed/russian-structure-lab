@@ -262,6 +262,8 @@ class HttpTests(unittest.TestCase):
         self.assertIn("frame-ancestors 'none'", csp)
         self.assertNotIn("__RSL_NONCE__", html)
         self.assertNotIn("__RSL_TOKEN_JSON__", html)
+        self.assertIn('id="diagnostic-panel"', html)
+        self.assertIn('id="copy-diagnostic"', html)
 
     def test_pilot_ignores_harmless_tracking_query_parameter(self):
         url = self.url.replace("/v1/analyze", "/pilot?utm_source=chatgpt.com")
@@ -311,6 +313,8 @@ class HttpTests(unittest.TestCase):
             status, body = self.request()
             self.assertEqual(status, 422)
             self.assertEqual(body["error"], "AI output rejected")
+            self.assertEqual(body["rejectedDraft"]["originalText"], "Changed")
+            self.assertIn("未検証", body["diagnosticWarning"])
         finally:
             self.provider.response = LESSON
 
