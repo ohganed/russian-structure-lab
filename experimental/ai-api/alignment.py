@@ -20,8 +20,14 @@ def _is_word_char(char):
 
 
 def _whole_token(text, start, end):
-    return ((start == 0 or not _is_word_char(text[start - 1]))
-            and (end == len(text) or not _is_word_char(text[end])))
+    """Prevent slicing through an original word; allow punctuation boundaries."""
+    left_safe = start == 0 or not (
+        _is_word_char(text[start - 1]) and _is_word_char(text[start])
+    )
+    right_safe = end == len(text) or not (
+        _is_word_char(text[end - 1]) and _is_word_char(text[end])
+    )
+    return left_safe and right_safe
 
 
 def _find_word(text, surface, start):
@@ -34,28 +40,28 @@ def _find_word(text, surface, start):
     raise ContractError("Cannot locate exact word in original sentence: " + repr(surface))
 
 
-def _find_chunk(text, value, word_spans, word_ids):
-    """Find an exact chunk source span without trusting invented word IDs.
-
-    Known IDs can disambiguate repeated phrases. Unknown IDs may be repaired
-    later ONLY if the literal text determines a unique, whole-word span.
-    """
+def _valid_anchors(word_ids, spans):
+    """Model-provided IDs are hints for repeated text, never source authority."""
     if not isinstance(word_ids, list):
-        raise ContractError("Chunk wordIds must be an array")
-    # An LLM sometimes writes JSON numbers (1) rather than string IDs ("1"),
-    # or uses null placeholders. These values are never authoritative:
-    # convert integral labels only for locating known anchors, and otherwise
-    # infer references solely from an exact, unambiguous source-text span.
-    if any(type(wid) not in (str, int) and wid is not None for wid in word_ids):
-        raise ContractError("Chunk wordIds contains unsupported values")
-    normalized = [str(wid) if type(wid) is int else wid for wid in word_ids]
-    known = [wid for wid in normalized if wid is not None and wid in word_spans]
+        return []
+    out = []
+    for value in word_ids:
+        if type(value) is int:
+            value = str(value)
+        if isinstance(value, str) and value in spans and value not in out:
+            out.append(value)
+    return out
 
-    if known and len(known) == len(normalized):
-        first = min(word_spans[wid][0] for wid in known)
-        last = max(word_spans[wid][1] for wid in known)
-        if text[first:last] == value:
-            return first, last
+
+def _find_chunk(text, value, word_spans, word_ids):
+    """Find exact source occurrence, preferring literal text over unreliable IDs.
+
+    An exact single match wins even when AI references are wrong. For repeated
+    phrases only, already-valid IDs can disambiguate. Every recovered span
+    must contain complete original words, never partial Cyrillic tokens.
+    """
+    if value == text and word_spans:
+        return 0, len(text)
 
     candidates = []
     at = text.find(value)
@@ -68,13 +74,23 @@ def _find_chunk(text, value, word_spans, word_ids):
                 a < end and b > at and not (at <= a and b <= end)
                 for a, b in word_spans.values()
             )
-            if contained and not partial and all(wid in contained for wid in known):
-                candidates.append((at, end))
+            if contained and not partial:
+                candidates.append((at, end, contained))
         at = text.find(value, at + 1)
-    if len(candidates) != 1:
-        raise ContractError("Chunk text cannot be aligned unambiguously: " + repr(value))
-    return candidates[0]
 
+    if len(candidates) == 1:
+        return candidates[0][:2]
+    if len(candidates) > 1:
+        anchors = _valid_anchors(word_ids, word_spans)
+        if anchors:
+            anchored = [candidate for candidate in candidates
+                        if all(ref in candidate[2] for ref in anchors)]
+            if len(anchored) == 1:
+                return anchored[0][:2]
+    raise ContractError(
+        "Chunk text cannot be aligned unambiguously to complete source words: "
+        + repr(value)
+    )
 
 
 def _repair_structure_refs(node, text, word_spans):
@@ -156,19 +172,15 @@ def align_generated_offsets(material, original):
         for chunk in sentence.get("chunks") or []:
             if not isinstance(chunk, dict) or not isinstance(chunk.get("text"), str) or not chunk["text"]:
                 raise ContractError("Chunk text is missing")
-            ids = chunk.get("wordIds", [])
-            if not isinstance(ids, list):
-                raise ContractError("Chunk wordIds must be an array")
-            start, end = _find_chunk(text, chunk["text"], spans, ids)
-            if any(type(wid) is not str or wid not in spans for wid in ids):
-                # Reconstruct references from source text, not the model's
-                # integer/null labels. The strict validator still runs afterward.
-                # Exact source text and existing IDs are the sole authorities.
-                matched = [wid for wid, (a, b) in spans.items()
-                           if start <= a and b <= end]
-                if not matched:
-                    raise ContractError("Chunk cannot identify any source words")
-                chunk["wordIds"] = matched
+            # All chunk references and positions come from literal source spans.
+            # Ollama's wordIds (including missing, wrong and numeric IDs) are
+            # only optional disambiguation hints for repeated identical text.
+            start, end = _find_chunk(text, chunk["text"], spans, chunk.get("wordIds"))
+            matched = [wid for wid, (a, b) in spans.items()
+                       if start <= a and b <= end]
+            if not matched:
+                raise ContractError("Chunk cannot identify any complete source word")
+            chunk["wordIds"] = matched
             chunk["start"] = _utf16_index(text, start)
             chunk["end"] = _utf16_index(text, end)
 
