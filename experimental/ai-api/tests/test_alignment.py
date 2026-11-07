@@ -352,11 +352,33 @@ class AlignmentTests(unittest.TestCase):
         with self.assertRaisesRegex(ContractError, "unambiguously"):
             align_generated_offsets(generated, text)
 
-    def test_duplicate_ids_not_hidden_by_alignment(self):
+    def test_duplicate_word_ids_become_unique_source_ordered_ids(self):
         generated = lesson()
         generated["sentences"][0]["words"][1]["id"] = "w1"
-        with self.assertRaises(ContractError):
-            validate_material(align_generated_offsets(generated, SOURCE), SOURCE)
+        fixed = align_generated_offsets(generated, SOURCE)
+        ids = [w["id"] for w in fixed["sentences"][0]["words"]]
+        self.assertEqual(ids, ["w1", "w2", "w3"])
+        self.assertEqual(generated["sentences"][0]["words"][1]["id"], "w1")
+        validate_material(fixed, SOURCE)
+
+    def test_numeric_and_missing_own_ids_are_generated_consistently(self):
+        generated = lesson()
+        sent = generated["sentences"][0]
+        sent["id"] = 1
+        sent["words"][0]["id"] = 1
+        sent["words"][1]["id"] = None
+        sent["chunks"][0]["id"] = 1
+        sent["chunks"][0]["wordIds"] = None
+        sent["structure"]["tree"]["refIds"] = [1, "w2", "w3"]
+        fixed = align_generated_offsets(generated, SOURCE)
+        self.assertEqual(fixed["sentences"][0]["id"], "1")
+        self.assertEqual([w["id"] for w in fixed["sentences"][0]["words"]],
+                         ["1", "w2", "w3"])
+        self.assertEqual(fixed["sentences"][0]["chunks"][0]["id"], "1")
+        self.assertEqual(fixed["sentences"][0]["chunks"][0]["wordIds"], ["1", "w2"])
+        self.assertEqual(fixed["sentences"][0]["structure"]["tree"]["refIds"],
+                         ["1", "w2", "w3"])
+        validate_material(fixed, SOURCE)
 
 
 if __name__ == "__main__":
