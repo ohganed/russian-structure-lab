@@ -40,11 +40,18 @@ def _find_chunk(text, value, word_spans, word_ids):
     Known IDs can disambiguate repeated phrases. Unknown IDs may be repaired
     later ONLY if the literal text determines a unique, whole-word span.
     """
-    if not isinstance(word_ids, list) or any(not isinstance(wid, str) for wid in word_ids):
-        raise ContractError("Chunk wordIds must be an array of strings")
-    known = [wid for wid in word_ids if wid in word_spans]
+    if not isinstance(word_ids, list):
+        raise ContractError("Chunk wordIds must be an array")
+    # An LLM sometimes writes JSON numbers (1) rather than string IDs ("1"),
+    # or uses null placeholders. These values are never authoritative:
+    # convert integral labels only for locating known anchors, and otherwise
+    # infer references solely from an exact, unambiguous source-text span.
+    if any(type(wid) not in (str, int) and wid is not None for wid in word_ids):
+        raise ContractError("Chunk wordIds contains unsupported values")
+    normalized = [str(wid) if type(wid) is int else wid for wid in word_ids]
+    known = [wid for wid in normalized if wid is not None and wid in word_spans]
 
-    if known and len(known) == len(word_ids):
+    if known and len(known) == len(normalized):
         first = min(word_spans[wid][0] for wid in known)
         last = max(word_spans[wid][1] for wid in known)
         if text[first:last] == value:
@@ -153,8 +160,9 @@ def align_generated_offsets(material, original):
             if not isinstance(ids, list):
                 raise ContractError("Chunk wordIds must be an array")
             start, end = _find_chunk(text, chunk["text"], spans, ids)
-            if any(wid not in spans for wid in ids):
-                # Reconstruct only the cross-references, never the lexical text.
+            if any(type(wid) is not str or wid not in spans for wid in ids):
+                # Reconstruct references from source text, not the model's
+                # integer/null labels. The strict validator still runs afterward.
                 # Exact source text and existing IDs are the sole authorities.
                 matched = [wid for wid, (a, b) in spans.items()
                            if start <= a and b <= end]
