@@ -17,10 +17,11 @@ from urllib.request import Request, urlopen
 
 from alignment import align_generated_offsets
 from contract import ContractError, validate_material
+from quality_gate import inspect_linguistic_quality
 
-PROMPT_VERSION = "v1.1-russian-linguistics"
+PROMPT_VERSION = "v1.2-linguistic-quality-gate"
 
-SYSTEM_PROMPT = """Russian Structure Lab — expert Russian morphology lesson (Ollama pilot v1.1).
+SYSTEM_PROMPT = """Russian Structure Lab — expert Russian morphology lesson (Ollama pilot v1.2).
 You are an expert in Russian linguistics, morphology, syntax, stress and aspect.
 Make an accurate, educational bilingual (Japanese+English) lesson from the
 provided Russian text. Favor CORRECT Russian analysis over JSON decoration.
@@ -28,16 +29,19 @@ OUTPUT: ONE JSON object only, without Markdown or explanatory wrapper.
 
 MANDATORY ROOT:
 schemaVersion="1.0", language="ru", originalText EXACTLY as submitted,
-title (short informative title), sentences (ALL original sentences in order).
+title (short, faithful meaning; NOT a different grammatical relation),
+sentences (ALL original sentences in order).
 Each sentence: id, text (EXACT substring of originalText), stressedText,
-ttsText, overallMeaning:{ja,en}, words, chunks, structure:{tree:{...}}.
+ttsText (Cyrillic Russian text, NEVER Latin transliteration),
+overallMeaning:{ja,en}, words, chunks, structure:{tree:{...}}.
 Never change spelling, spaces, punctuation, ё, or word order in source fields.
 Do not include unstated sentences or omit original sentences.
 
 RUSSIAN WORD ANALYSIS — PRIORITY:
 Every word has id, surface (EXACT original substring), stressed (same word
 with optional combining acute accent U+0301), lemma (real DICTIONARY form),
-meaning:{ja,en}, partOfSpeech:{ru,en,ja}, confidence:{overall}.
+meaning:{ja,en}, partOfSpeech:{ru,en,ja}, confidence:{overall}. 
+confidence MUST be an object like {"overall":"medium"}, never a lone string.
 Use Russian linguistic terms, NOT Japanese morphological analyzer labels,
 not Japanese particles such as "の" or "する" as Russian endings.
 
@@ -51,6 +55,11 @@ For verbs include lemma (INFINITIVE), aspect
 ("imperfective" or "perfective"), tense, person, number,
 conjugation and, only if reliable, aspectPair.
 Do not mistake a finite conjugated form for an infinitive.
+A present/future finite verb ending in -ю or -у is 1st person SINGULAR,
+NOT 3rd person singular; verify agreement with overt subjects.
+Noun grammatical gender comes from the LEMMA, and does not change by case.
+A lemma ending in -а is not always feminine (e.g. папа is masculine).
+Check the gender from the actual Russian lexical entry.
 
 REFERENCE EXAMPLE FOR MORPHOLOGY ONLY (never substitute for user input):
 "Мы покупаем газету."
@@ -82,6 +91,8 @@ Text must be an EXACT contiguous sentence substring when refIds are used.
 refIds must be EXACT IDs from this sentence's words array, respecting case;
 never invent identifiers. Children is always an array.
 Prefer a concise, defensible tree to a long speculative one.
+For each stressed word, propagate its accent to sentence.stressedText.
+Do NOT use Latin text for ttsText; use the Russian Cyrillic sentence.
 Do NOT generate word/chunk start/end offsets: the local server calculates
 them deterministically as JavaScript UTF-16 positions.
 
@@ -263,6 +274,16 @@ def handler_factory(provider, token, allowed_origin=None):
                 generated = provider.generate(original)
                 aligned = align_generated_offsets(generated, original)
                 validated = validate_material(aligned, original)
+                quality = inspect_linguistic_quality(validated)
+                errors = [i for i in quality["issues"] if i["severity"] == "error"]
+                if errors:
+                    return self.send_json(422, {
+                        "error": "Linguistic contradictions detected",
+                        "detail": "文法の矛盾が見つかりました。未検証JSONを教材へ取り込まないでください。",
+                        "qualityIssues": quality["issues"],
+                        "rejectedDraft": validated,
+                        "diagnosticWarning": "未検証の生成結果です。教材へ取り込まないでください。",
+                    })
             except ProviderError as exc:
                 elapsed = round(time.monotonic() - started, 1)
                 print(f"[rsl-provider] {exc.code}; elapsed={elapsed}s; input_chars={len(original)}", flush=True)
@@ -292,7 +313,9 @@ def handler_factory(provider, token, allowed_origin=None):
                 "provider": "ollama",
                 "model": getattr(provider, "model", None),
                 "promptVersion": PROMPT_VERSION,
+                "linguisticStatus": "review_required",
             }
+            validated["qualityReview"] = quality
             return self.send_json(200, validated)
 
     return Handler
