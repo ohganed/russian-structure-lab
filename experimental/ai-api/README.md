@@ -285,3 +285,31 @@ itself or AI Radio on 4180:
 
 If 8769 is in use, stop the specific old pilot process in its original
 terminal using Control+C. Do not blindly kill other Python processes.
+
+
+## Fix: Chunk wordIds must be an array of strings
+
+The 7B model can emit JSON numeric labels such as \`"wordIds":[1,2]\`
+or unresolved \`null\` members even though the lesson contract expects
+string word IDs. The local alignment step now treats integral labels as
+potential anchors and null as unknown. It resolves the actual reference
+from exact chunk.text and the aligned sentence.words source spans only
+when the occurrence is unambiguous. Final output always uses existing
+string word IDs. Other invalid types (boolean, floating-point, object,
+nested arrays) and non-array wordIds still fail closed. This is a
+structural fix only and DOES NOT review lemma, case, aspect or stress.
+
+GitHub CI includes tests for numeric/null refs, repeated text with
+numeric anchors, unsafe types, and the complete local HTTP API response.
+
+Retest with a **new local pilot port** rather than killing a process
+you cannot positively identify:
+
+    cd ~/Downloads/russian-structure-lab-ollama-pilot
+    git pull --ff-only origin experiment/ai-api-v0
+    RSL_OLLAMA_MODEL=qwen2.5:7b RSL_PORT=8771 python3 experimental/ai-api/start_mac.py
+
+Then manually open http://127.0.0.1:8771/pilot if necessary. Keep the
+Terminal window running; AI Radio on 4180 remains unaffected. If another
+error appears, record its exact wording; do not treat any accepted lesson
+as automatically linguistically correct.
