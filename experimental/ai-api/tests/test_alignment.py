@@ -122,6 +122,70 @@ class AlignmentTests(unittest.TestCase):
         self.assertEqual(fixed["sentences"][0]["structure"]["tree"]["refIds"], ["w3"])
         validate_material(fixed, text)
 
+    def test_repairs_unknown_chunk_word_ids_from_exact_source(self):
+        generated = lesson()
+        sent = generated["sentences"][0]
+        sent["chunks"][0]["wordIds"] = ["word_1", "word_2"]
+        sent["chunks"][1]["wordIds"] = ["word_3"]
+        fixed = align_generated_offsets(generated, SOURCE)
+        self.assertEqual(fixed["sentences"][0]["chunks"][0]["wordIds"], ["w1", "w2"])
+        self.assertEqual(fixed["sentences"][0]["chunks"][1]["wordIds"], ["w3"])
+        self.assertEqual(fixed["sentences"][0]["chunks"][0]["start"], 0)
+        self.assertTrue(validate_material(fixed, SOURCE))
+        self.assertEqual(generated["sentences"][0]["chunks"][0]["wordIds"],
+                         ["word_1", "word_2"])
+
+    def test_mixed_valid_and_unknown_chunk_refs_keep_real_anchor(self):
+        generated = lesson()
+        generated["sentences"][0]["chunks"][0]["wordIds"] = ["w2", "invented"]
+        fixed = align_generated_offsets(generated, SOURCE)
+        self.assertEqual(fixed["sentences"][0]["chunks"][0]["wordIds"], ["w1", "w2"])
+        self.assertTrue(validate_material(fixed, SOURCE))
+
+    def test_unknown_chunk_refs_not_repaired_for_changed_text(self):
+        generated = lesson()
+        ch = generated["sentences"][0]["chunks"][0]
+        ch["text"] = "Я чита"
+        ch["wordIds"] = ["unknown"]
+        with self.assertRaisesRegex(ContractError, "unambiguously"):
+            align_generated_offsets(generated, SOURCE)
+
+    def test_repeated_chunk_with_unknown_refs_is_ambiguous(self):
+        text = "Я и Я."
+        generated = lesson(text)
+        sent = generated["sentences"][0]
+        sent["words"] = [
+            {"id": "w1", "surface": "Я"},
+            {"id": "w2", "surface": "и"},
+            {"id": "w3", "surface": "Я"},
+        ]
+        sent["chunks"] = [{"id": "c1", "text": "Я", "wordIds": ["invented"]}]
+        sent["structure"]["tree"]["refIds"] = ["w1", "w2", "w3"]
+        with self.assertRaisesRegex(ContractError, "unambiguously"):
+            align_generated_offsets(generated, text)
+
+    def test_repeated_chunk_uses_existing_ref_as_disambiguator(self):
+        text = "Я и Я."
+        generated = lesson(text)
+        sent = generated["sentences"][0]
+        sent["words"] = [
+            {"id": "w1", "surface": "Я"},
+            {"id": "w2", "surface": "и"},
+            {"id": "w3", "surface": "Я"},
+        ]
+        sent["chunks"] = [{"id": "c1", "text": "Я",
+                           "wordIds": ["w3", "invented"]}]
+        sent["structure"]["tree"]["refIds"] = ["w1", "w2", "w3"]
+        fixed = align_generated_offsets(generated, text)
+        self.assertEqual(fixed["sentences"][0]["chunks"][0]["wordIds"], ["w3"])
+        self.assertEqual(fixed["sentences"][0]["chunks"][0]["start"], 4)
+        validate_material(fixed, text)
+
+    def test_known_chunk_refs_remain_unchanged(self):
+        generated = lesson()
+        fixed = align_generated_offsets(generated, SOURCE)
+        self.assertEqual(fixed["sentences"][0]["chunks"][0]["wordIds"], ["w1", "w2"])
+
     def test_repeated_word_uses_id_anchor(self):
         text = "Я и я."
         generated = lesson(text)
