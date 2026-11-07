@@ -313,3 +313,42 @@ Then manually open http://127.0.0.1:8771/pilot if necessary. Keep the
 Terminal window running; AI Radio on 4180 remains unaffected. If another
 error appears, record its exact wording; do not treat any accepted lesson
 as automatically linguistically correct.
+
+
+## Systemic correction: model-independent chunk alignment + diagnostic drafts
+
+Previously the server sometimes rejected an exact chunk like
+"Я читаю книгу." because it used AI-generated wordIds to filter source
+candidates. The current implementation does the reverse:
+1. Align words against the immutable original sentence text.
+2. Use exact chunk.text to find full-word occurrences. An entire sentence
+   is always a valid unambiguous chunk within that sentence.
+3. If the substring is unique, derive its wordIds **entirely from aligned
+   source words**, ignoring any inconsistent AI-provided IDs.
+4. Only use existing model IDs as hints when the same text occurs multiple
+   times. If still ambiguous, return a validation error rather than choose.
+5. Canonicalize sentence/word/chunk IDs to unique strings as needed.
+6. Strictly validate the result before offering it as a lesson.
+
+The provider prompt no longer requests chunk wordIds or offsets at all.
+
+**New diagnostic mode:** If the generated output fails validation, the
+Mac-only browser may display a temporary *unverified* rejected draft,
+with a "diagnostic JSON" copy control. This is returned solely within the
+bearer-authenticated localhost session; it is not saved or logged by
+the server. NEVER import diagnostic drafts into the learning library.
+Remove any personal or confidential details before sharing diagnostics.
+
+**No more numbered-port guessing:** Run the current code in a new terminal:
+
+    cd ~/Downloads/russian-structure-lab-ollama-pilot
+    git pull --ff-only origin experiment/ai-api-v0
+    RSL_OLLAMA_MODEL=qwen2.5:7b RSL_PORT=0 python3 experimental/ai-api/start_mac.py
+
+\`RSL_PORT=0\` asks macOS to pick a free loopback port and the pilot
+prints/opens the **actual** URL automatically. Keep this terminal open.
+The old local pilots and separate AI Radio service remain untouched.
+
+Passing source-reference checks does not imply correct Russian grammar,
+case, aspect, stress or translation. All such content still requires
+expert review.
