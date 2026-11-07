@@ -46,6 +46,13 @@ small{font-size:12px;color:var(--muted)}.note{border-left:3px solid #aa8c58;padd
 <p id="message" role="status" aria-live="polite">文章を入力して「解析」を押してください。</p>
 <small>入力した原文と解析結果はサーバー側に保存されません。端末上のモデルで処理し、外部クラウドへ送る機能はありません。</small>
 </section>
+<section class="panel" id="diagnostic-panel" hidden>
+<h2>解析できなかったJSON（診断用）</h2>
+<p class="note">これはAIの未検証出力です。教材への取り込みは禁止です。Macの画面にのみ一時表示され、サーバーには保存しません。外部へ共有する際は個人情報・機密情報を削除してください。</p>
+<label for="diagnostic-output">不採用になったJSON</label>
+<textarea id="diagnostic-output" readonly spellcheck="false" style="font:12px/1.6 ui-monospace,Menlo,monospace" aria-label="診断用の未検証JSON"></textarea>
+<div class="buttons"><button id="copy-diagnostic" type="button">診断用JSONをコピー</button></div>
+</section>
 <section class="panel" id="result-panel" hidden>
 <h2>2 · 解析結果（教材JSON v1.0）</h2>
 <div class="stats" id="stats"></div>
@@ -78,6 +85,8 @@ $("analyze").addEventListener("click",async()=>{
   if(!original.trim()){say("ロシア語の文章を入力してください。","bad");return;}
   $("analyze").disabled=true;
   $("result-panel").hidden=true;
+  $("diagnostic-panel").hidden=true;
+  $("diagnostic-output").value="";
   generated=null;
   say("Ollamaで解析しています。長文は時間がかかる場合があります。");
   try{
@@ -87,7 +96,14 @@ $("analyze").addEventListener("click",async()=>{
       body:JSON.stringify({originalText:original}),cache:"no-store"
     });
     const data=await response.json();
-    if(!response.ok)throw new Error(data.detail||data.error||("HTTP "+response.status));
+    if(!response.ok){
+      if(data.rejectedDraft!==undefined){
+        $("diagnostic-output").value=JSON.stringify({error:data.detail||data.error,
+          model:"ローカルOllama（未検証）",draft:data.rejectedDraft},null,2);
+        $("diagnostic-panel").hidden=false;
+      }
+      throw new Error(data.detail||data.error||("HTTP "+response.status));
+    }
     generated=data;
     $("output").value=JSON.stringify(data,null,2);
     const sentences=Array.isArray(data.sentences)?data.sentences:[];
@@ -99,6 +115,18 @@ $("analyze").addEventListener("click",async()=>{
   }catch(error){
     say("解析結果を採用できませんでした: "+String(error.message||error),"bad");
   }finally{$("analyze").disabled=false;}
+});
+$("copy-diagnostic").addEventListener("click",async()=>{
+  const raw=$("diagnostic-output").value;
+  if(!raw)return;
+  try{
+    await navigator.clipboard.writeText(raw);
+    say("未検証JSONをコピーしました。共有前に個人情報を確認してください。","bad");
+  }catch{
+    $("diagnostic-output").focus();
+    $("diagnostic-output").select();
+    say("自動コピーできません。選択されたJSONをCommand+Cでコピーしてください。","bad");
+  }
 });
 $("copy").addEventListener("click",async()=>{
   if(!generated)return;
