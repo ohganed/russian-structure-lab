@@ -13,6 +13,7 @@ from urllib.request import Request, urlopen
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 from contract import ContractError, validate_material  # noqa: E402
 from server import handler_factory, ProviderError, OllamaProvider, SYSTEM_PROMPT, PROMPT_VERSION  # noqa: E402
+from start_mac import pilot_url  # noqa: E402
 
 SOURCE = "Я читаю."
 LESSON = {
@@ -99,6 +100,9 @@ class RussianPromptTests(unittest.TestCase):
         self.assertIn('EXACT original substring', SYSTEM_PROMPT)
         self.assertIn('Do NOT generate word/chunk start/end offsets', SYSTEM_PROMPT)
 
+    def test_prompt_delegates_chunk_refs_to_deterministic_server(self):
+        self.assertIn("Do NOT generate chunk wordIds or start/end", SYSTEM_PROMPT)
+
     def test_prompt_warns_against_japanese_morphology_leakage(self):
         self.assertIn('NOT Japanese morphological analyzer labels', SYSTEM_PROMPT)
         self.assertIn('never invent identifiers', SYSTEM_PROMPT)
@@ -171,6 +175,11 @@ class HttpTests(unittest.TestCase):
                 return resp.status, json.load(resp)
         except HTTPError as exc:
             return exc.code, json.load(exc)
+
+    def test_browser_url_uses_actual_random_bound_port(self):
+        self.assertEqual(pilot_url(self.httpd),
+                         f"http://127.0.0.1:{self.httpd.server_address[1]}/pilot")
+        self.assertNotIn(":0/pilot", pilot_url(self.httpd))
 
     def test_success(self):
         status, body = self.request()
