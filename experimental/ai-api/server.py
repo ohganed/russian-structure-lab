@@ -67,9 +67,12 @@ use "high", "medium", "low" as qualitative levels and lower it for
 ambiguous analysis. Do NOT invent inflection or etymology.
 Use exact, context-appropriate Japanese and English translations.
 
-Each chunk: id, text (EXACT contiguous source substring), wordIds (existing
-word IDs only), meaningOrder:{ja,en} (structure-preserving translation),
+Each chunk: id, text (EXACT contiguous source substring),
+meaningOrder:{ja,en} (structure-preserving translation),
 naturalMeaning:{ja,en} (natural translation), function:{ja,en}.
+Do NOT generate chunk wordIds or start/end; the local server reconstructs
+them from the exact original sentence text. When the same chunk text appears
+more than once, you MAY add existing wordIds as occurrence hints only.
 A sentence-wide chunk is acceptable. Use source order for words.
 Every lexical word must appear in words and all its letters exactly match
 the sentence text.
