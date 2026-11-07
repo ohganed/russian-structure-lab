@@ -297,6 +297,8 @@ class HttpTests(unittest.TestCase):
         self.assertNotIn("__RSL_TOKEN_JSON__", html)
         self.assertIn('id="diagnostic-panel"', html)
         self.assertIn('id="copy-diagnostic"', html)
+        self.assertIn('id="quality-panel"', html)
+        self.assertIn('function showQuality(issues)', html)
 
     def test_pilot_ignores_harmless_tracking_query_parameter(self):
         url = self.url.replace("/v1/analyze", "/pilot?utm_source=chatgpt.com")
