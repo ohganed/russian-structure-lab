@@ -53,6 +53,11 @@ small{font-size:12px;color:var(--muted)}.note{border-left:3px solid #aa8c58;padd
 <textarea id="diagnostic-output" readonly spellcheck="false" style="font:12px/1.6 ui-monospace,Menlo,monospace" aria-label="診断用の未検証JSON"></textarea>
 <div class="buttons"><button id="copy-diagnostic" type="button">診断用JSONをコピー</button></div>
 </section>
+<section class="panel" id="quality-panel" hidden>
+<h2>ロシア語文法の確認事項</h2>
+<p class="note" id="quality-summary">JSONの整合性と、文法の正確性は別です。必ず専門家の確認をしてください。</p>
+<ul id="quality-issues"></ul>
+</section>
 <section class="panel" id="result-panel" hidden>
 <h2>2 · 解析結果（教材JSON v1.0）</h2>
 <div class="stats" id="stats"></div>
@@ -79,12 +84,32 @@ const token=__RSL_TOKEN_JSON__;
 const $=id=>document.getElementById(id);
 let generated=null;
 const say=(message,kind="")=>{$("message").textContent=message;$("message").className=kind;};
+function showQuality(issues){
+  $("quality-panel").hidden=false;
+  $("quality-issues").replaceChildren();
+  $("quality-summary").textContent=
+    "自動チェックは文法全体を保証しません。エラーは教材への取り込みを停止します。";
+  if(!issues.length){
+    const li=document.createElement("li");
+    li.textContent="検出済みの矛盾はありません。ただし文法の専門的確認は必要です。";
+    $("quality-issues").append(li);
+  } else {
+    for(const item of issues){
+      const li=document.createElement("li");
+      li.textContent=(item.severity==="error"?"要修正: ":"要確認: ")+
+        (item.messageJa||item.code||"未確認の解析結果");
+      $("quality-issues").append(li);
+    }
+  }
+}
 $("sample").addEventListener("click",()=>{$("original").value="Я вчера не купил свою интересную книгу.";});
 $("analyze").addEventListener("click",async()=>{
   const original=$("original").value;
   if(!original.trim()){say("ロシア語の文章を入力してください。","bad");return;}
   $("analyze").disabled=true;
   $("result-panel").hidden=true;
+  $("quality-panel").hidden=true;
+  $("quality-issues").replaceChildren();
   $("diagnostic-panel").hidden=true;
   $("diagnostic-output").value="";
   generated=null;
@@ -97,6 +122,9 @@ $("analyze").addEventListener("click",async()=>{
     });
     const data=await response.json();
     if(!response.ok){
+      if(Array.isArray(data.qualityIssues)){
+        showQuality(data.qualityIssues);
+      }
       if(data.rejectedDraft!==undefined){
         $("diagnostic-output").value=JSON.stringify({error:data.detail||data.error,
           model:"ローカルOllama（未検証）",draft:data.rejectedDraft},null,2);
@@ -105,13 +133,14 @@ $("analyze").addEventListener("click",async()=>{
       throw new Error(data.detail||data.error||("HTTP "+response.status));
     }
     generated=data;
+    if(data.qualityReview){ showQuality(data.qualityReview.issues||[]); }
     $("output").value=JSON.stringify(data,null,2);
     const sentences=Array.isArray(data.sentences)?data.sentences:[];
     const words=sentences.reduce((n,s)=>n+(s.words?.length||0),0);
     $("stats").textContent="文章 "+sentences.length+"件 · 単語 "+words+"件 · モデル: "+(data.analysisMeta?.model||"不明")+" · プロンプト: "+(data.analysisMeta?.promptVersion||"不明")+" · JSON schema "+data.schemaVersion;
     $("preview").textContent=sentences.map(s=>s.text).join("\n");
     $("result-panel").hidden=false;
-    say("形式検証に合格しました。JSONをコピーしてAI Materialへ取り込めます。","good");
+    say("JSON形式の検証は合格しました。文法は未検証のため、確認後に取り込んでください。","good");
   }catch(error){
     say("解析結果を採用できませんでした: "+String(error.message||error),"bad");
   }finally{$("analyze").disabled=false;}
