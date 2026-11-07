@@ -255,6 +255,7 @@ def handler_factory(provider, token, allowed_origin=None):
             except (ValueError, UnicodeError, ContractError) as exc:
                 return self.send_json(422, {"error": "Invalid request", "detail": str(exc)})
             started = time.monotonic()
+            generated = None
             try:
                 generated = provider.generate(original)
                 aligned = align_generated_offsets(generated, original)
@@ -265,8 +266,18 @@ def handler_factory(provider, token, allowed_origin=None):
                 return self.send_json(502, {"error": "AI provider unavailable",
                                             "code": exc.code, "detail": str(exc)})
             except (ContractError, KeyError, ValueError, TypeError) as exc:
-                # Never return a malformed AI-generated lesson as a success.
-                return self.send_json(422, {"error": "AI output rejected", "detail": str(exc)})
+                # Never return malformed AI output as a lesson. For this
+                # localhost-only, bearer-authenticated pilot, give the *local*
+                # browser a transient diagnostic copy of the original draft.
+                # No server storage or terminal logging of source material.
+                detail = {"error": "AI output rejected", "detail": str(exc)}
+                if generated is not None:
+                    detail["rejectedDraft"] = generated
+                    detail["diagnosticWarning"] = (
+                        "未検証の生成結果です。教材へ取り込まないでください。"
+                        "外部に共有する前に個人情報を削除してください。"
+                    )
+                return self.send_json(422, detail)
             except Exception as exc:
                 # Log the error type only; never print submitted text or AI output.
                 print(f"[rsl-provider] unexpected={type(exc).__name__}; input_chars={len(original)}", flush=True)
