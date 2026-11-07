@@ -186,6 +186,54 @@ class AlignmentTests(unittest.TestCase):
         fixed = align_generated_offsets(generated, SOURCE)
         self.assertEqual(fixed["sentences"][0]["chunks"][0]["wordIds"], ["w1", "w2"])
 
+    def test_numeric_chunk_word_ids_repaired_with_real_source_words(self):
+        generated = lesson()
+        generated["sentences"][0]["chunks"][0]["wordIds"] = [1, 2]
+        generated["sentences"][0]["chunks"][1]["wordIds"] = [3]
+        fixed = align_generated_offsets(generated, SOURCE)
+        self.assertEqual(fixed["sentences"][0]["chunks"][0]["wordIds"], ["w1", "w2"])
+        self.assertEqual(fixed["sentences"][0]["chunks"][1]["wordIds"], ["w3"])
+        validate_material(fixed, SOURCE)
+
+    def test_null_chunk_word_id_repaired_when_text_is_unique(self):
+        generated = lesson()
+        generated["sentences"][0]["chunks"][1]["wordIds"] = [None]
+        fixed = align_generated_offsets(generated, SOURCE)
+        self.assertEqual(fixed["sentences"][0]["chunks"][1]["wordIds"], ["w3"])
+        validate_material(fixed, SOURCE)
+
+    def test_numeric_chunk_word_id_can_disambiguate_repeated_text(self):
+        text = "Я и Я."
+        generated = lesson(text)
+        sent = generated["sentences"][0]
+        sent["words"] = [
+            {"id": "1", "surface": "Я"},
+            {"id": "2", "surface": "и"},
+            {"id": "3", "surface": "Я"},
+        ]
+        sent["chunks"] = [{"id": "c1", "text": "Я", "wordIds": [3]}]
+        sent["structure"]["tree"]["refIds"] = ["1", "2", "3"]
+        fixed = align_generated_offsets(generated, text)
+        self.assertEqual(fixed["sentences"][0]["chunks"][0]["wordIds"], ["3"])
+        self.assertEqual(fixed["sentences"][0]["chunks"][0]["start"], 4)
+        validate_material(fixed, text)
+
+    def test_noninteger_chunk_refs_are_rejected(self):
+        for invalid in (True, 1.5, {"id": "w2"}, ["w2"]):
+            with self.subTest(invalid=invalid):
+                generated = lesson()
+                generated["sentences"][0]["chunks"][0]["wordIds"] = [invalid]
+                with self.assertRaisesRegex(ContractError, "unsupported"):
+                    align_generated_offsets(generated, SOURCE)
+
+    def test_scalar_chunk_word_ids_are_rejected(self):
+        for invalid in (2, "w2", None):
+            with self.subTest(invalid=invalid):
+                generated = lesson()
+                generated["sentences"][0]["chunks"][0]["wordIds"] = invalid
+                with self.assertRaisesRegex(ContractError, "array"):
+                    align_generated_offsets(generated, SOURCE)
+
     def test_repeated_word_uses_id_anchor(self):
         text = "Я и я."
         generated = lesson(text)
